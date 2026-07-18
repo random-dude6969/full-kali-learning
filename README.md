@@ -154,7 +154,7 @@ The documentation follows the MITRE ATT&CK framework — 16 phases of a cyber at
 | 07 | [Defense Evasion](07_defense_evasion/) | 16 | DONE | Mimikatz, Impacket, Veil |
 | 08 | [Credential Access](08_credential_access/) | 52 | DONE | Hydra, John, Hashcat, Responder |
 | 09 | [Discovery](09_discovery/) | 88 | DONE | Wireshark, BloodHound, Ettercap |
-| 10 | Lateral Movement | 3 | Coming | PsExec, WMI |
+| 10 | [Lateral Movement](10_lateral_movement/) | 3 | **Complete** | PsExec, SMBExec, RDesktop |
 | 11 | Collection | 12 | Coming | Keyloggers, Screen capture |
 | 12 | Command and Control | 30 | Coming | C2 frameworks |
 | 13 | Exfiltration | 3 | Coming | Data exfil tools |
