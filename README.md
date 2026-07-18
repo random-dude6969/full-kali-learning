@@ -601,6 +601,6 @@ Always obtain proper authorization before testing systems you do not own.
 
 <div align="center">
 
-**299 tools documented. 200,000+ lines. Updated weekly.**
+**302 tools documented. 200,000+ lines. 10 phases complete. Updated weekly.**
 
 </div>
