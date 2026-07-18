@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Kali capture files
+*.pcap
+*.pcapng
+*.cap
+*.hccap
+
+# Temp
+*.tmp
+*.bak
