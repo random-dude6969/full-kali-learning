@@ -2,6 +2,8 @@
 
 <img src="headeroftherepo.png" width="100%" alt="Kali Linux Tools - Complete Educational Documentation">
 
+<img src="star.png" width="600" alt="Give a Star for this repo">
+
 # Kali Linux Tools - Complete Documentation & Tutorial
 
 ### The Ultimate Kali Linux Commands Cheat Sheet and Penetration Testing Guide
@@ -486,6 +488,8 @@ Educational purposes only. Always get authorization before testing systems you d
 <div align="center">
 
 ### Star This Repo
+
+<img src="star.png" width="500" alt="Give a Star">
 
 If this helps your learning, give it a star. It motivates more content.
 
