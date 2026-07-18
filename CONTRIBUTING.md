@@ -49,11 +49,13 @@ Every tool must follow the 8-chapter structure:
 ```
 
 ### 3. Quality Standards
-- Minimum 500 lines per tool
 - Every command must have an `**Explanation:**` line
 - Use real examples, not placeholders
 - Include YAML frontmatter with all fields
 - Create a CHEATSHEET.md alongside the main doc
+- **No line limit** — make documentation as comprehensive as needed
+- The best tools have 800-1000+ lines with detailed examples
+- Cheatsheets should cover every common use case, no matter how long
 
 ### 4. Submit a PR
 1. Fork the repo
