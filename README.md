@@ -90,8 +90,8 @@ Most tool lists just link to projects. This repo gives you **complete documentat
 | 05 | [Persistence](05_persistence/) | 7 | DONE | Weevely, Laudanum, PHPGGC |
 | 06 | [Privilege Escalation](06_privilege_escalation/) | 6 | DONE | LinPEAS, WinPEAS, Lynis |
 | 07 | [Defense Evasion](07_defense_evasion/) | 16 | DONE | Mimikatz, Impacket, Veil |
-| 08 | Credential Access | 52 | Coming | Hydra, John, Hashcat |
-| 09 | Discovery | 88 | Coming | BloodHound, CrackMapExec |
+| 08 | [Credential Access](08_credential_access/) | 52 | **Complete** | Hydra, John, Hashcat, Responder |
+| 09 | [Discovery](09_discovery/) | 88 | **Complete** | Wireshark, BloodHound, Ettercap |
 | 10 | Lateral Movement | 3 | Coming | PsExec, WMI |
 | 11 | Collection | 12 | Coming | Keyloggers, Screen capture |
 | 12 | Command and Control | 30 | Coming | C2 frameworks |
@@ -106,12 +106,9 @@ Most tool lists just link to projects. This repo gives you **complete documentat
 
 ---
 
-## Why 159+ People Starred This Repo
-
-> "Finally, a Kali tool repo that actually explains things instead of just listing links."
 
 - **Real examples** — every command shows what it does, not just the flag
-- **Zero fluff** — straight to the point, no AI-generated filler
+- **Zero fluff** — straight to the point, zero filler
 - **CTF ready** — scenarios you'll actually use in competitions
 - **OSCP aligned** — covers every tool in the certification
 - **Blue team included** — detection sections for every tool
@@ -230,8 +227,8 @@ Plus a **CHEATSHEET.md** for quick reference.
 [x] Phase 05 - Persistence (7 tools) DONE
 [x] Phase 06 - Privilege Escalation (6 tools) DONE
 [x] Phase 07 - Defense Evasion (16 tools) DONE
-[ ] Phase 08 - Credential Access (52 tools) NEXT
-[ ] Phase 09 - Discovery (88 tools)
+[x] Phase 08 - Credential Access (52 tools) DONE NEXT
+[x] Phase 09 - Discovery (88 tools) DONE
 [ ] Phase 10 - Lateral Movement (3 tools)
 [ ] Phase 11 - Collection (12 tools)
 [ ] Phase 12 - Command and Control (30 tools)
@@ -471,16 +468,6 @@ Just found the most comprehensive Kali Linux tools repo on GitHub:
 From Nmap to Mimikatz — everything for penetration testing.
 Check it out: https://github.com/random-dude6969/full-kali-learning
 ```
-
-### Where to Share
-
-- **Reddit**: r/netsec, r/hacking, r/cybersecurity, r/OSCP
-- **Twitter/X**: Tag #cybersecurity #pentesting #kalilinux #infosec
-- **Discord**: Cybersecurity study servers
-- **YouTube**: Reference in tutorial descriptions
-- **Hacker News**: Show HN post
-- **Dev.to / Medium**: Write about your experience using it
-
 ---
 ## License
 
