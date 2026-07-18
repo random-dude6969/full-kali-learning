@@ -1,228 +1,205 @@
 <div align="center">
 
-# Kali Linux Tools — Complete Educational Documentation
+# Kali Linux Tools - The Complete Learning Repository
 
-### *Master every tool. Understand every technique. From zero to expert.*
+### From Zero to Expert - Master Every Tool, Every Technique
 
 [![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-16%20Tactics-blue?style=for-the-badge&logo=mitreattack&logoColor=white)](https://attack.mitre.org/)
-[![Tools Documented](https://img.shields.io/badge/Tools-114+-red?style=for-the-badge&logo=kali-linux&logoColor=white)](01_reconnaissance/)
-[![Lines of Content](https://img.shields.io/badge/Lines-96%2C898+-green?style=for-the-badge)](CHEATSHEET.md)
-[![Phase 01 Complete](https://img.shields.io/badge/Phase%2001-80%2F80%20100%25-brightgreen?style=for-the-badge)](01_reconnaissance/)
-[![Phase 02 Complete](https://img.shields.io/badge/Phase%2002-34%2F34%20100%25-brightgreen?style=for-the-badge)](02_resource_development/)
+[![Tools](https://img.shields.io/badge/Tools-432%2B-red?style=for-the-badge&logo=kali-linux&logoColor=white)](#tool-list)
+[![Lines](https://img.shields.io/badge/Lines-105K%2B-green?style=for-the-badge)](#)
+[![Phase](https://img.shields.io/badge/Phase%2001-Complete-brightgreen?style=for-the-badge)](#phase-01--reconnaissance)
+[![Phase](https://img.shields.io/badge/Phase%2002-Complete-brightgreen?style=for-the-badge)](#phase-02--resource-development)
+[![WIP](https://img.shields.io/badge/Status-Active%20Development-yellow?style=for-the-badge)](#roadmap)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 ---
 
-**The most comprehensive, beginner-to-master educational resource for Kali Linux tools — organized by the MITRE ATT&CK framework.**
+**The most comprehensive, structured educational resource for Kali Linux cybersecurity tools.**
+
+432+ tools documented from zero to master, organized by the MITRE ATT&CK framework.
+Every tool gets a full 8-chapter guide with real examples, not just a man page reprint.
+
+**Star this repo if it helps you learn** - it keeps the project going.
 
 </div>
 
 ---
 
+## Why This Repo?
+
+Most Kali tool docs are either too shallow (a few commands) or too scattered (random blog posts). This repo takes a different approach:
+
+- **Structured learning path** - follow MITRE ATT&CK phases in order
+- **8-chapter template per tool** - intro, install, basic, intermediate, advanced, scenarios, defense, troubleshooting
+- **Real command examples** - every command has an explanation, not just a flag dump
+- **Beginner to advanced** - each tool starts simple and builds up
+- **CTF and bug bounty focused** - scenarios you'll actually encounter
+- **Blue team included** - detection and defense sections for every tool
+
+---
+
 ## What's Inside
 
-| Component | Status | Description |
-|-----------|--------|-------------|
-| [INDEX.md](INDEX.md) | Complete | Master learning roadmap with all tools |
-| [CHEATSHEET.md](CHEATSHEET.md) | Complete | Quick-reference card for every tool |
-| [Phase 01: Reconnaissance](01_reconnaissance/) | **100%** | **80/80 tools documented** |
-| [Phase 02: Resource Development](02_resource_development/) | **100%** | **34/34 tools documented** |
+| Phase | Name | Tools | Lines | Status |
+|-------|------|-------|-------|--------|
+| 01 | [Reconnaissance](01_reconnaissance/) | 80 | 75,606 | **Complete** |
+| 02 | [Resource Development](02_resource_development/) | 34 | 21,292 | **Complete** |
+| 03 | Initial Access | 10 | - | Developing |
+| 04 | Execution | 6 | - | Developing |
+| 05 | Persistence | 7 | - | Developing |
+| 06 | Privilege Escalation | 6 | - | Developing |
+| 07 | Defense Evasion | 16 | - | Developing |
+| 08 | Credential Access | 52 | - | Developing |
+| 09 | Discovery | 88 | - | Developing |
+| 10 | Lateral Movement | 3 | - | Developing |
+| 11 | Collection | 12 | - | Developing |
+| 12 | Command and Control | 30 | - | Developing |
+| 13 | Exfiltration | 3 | - | Developing |
+| 14 | Impact | 10 | - | Developing |
+| 15 | Forensics | 51 | - | Developing |
+| 16 | Services and Other | 15 | - | Developing |
 
 ---
 
-## How to Use This Resource
+## Roadmap
 
-### Beginner Track (60-80 hours)
 ```
-1. Phase 01 -> Nmap, TheHarvester, Gobuster, FFuf, Nikto, WhatWeb
-2. Phase 02 -> GDB, Ghidra, Radare2 (reverse engineering basics)
-3. Phase 02 -> SearchSploit, MSFvenom (exploit/payload basics)
+[x] Phase 01 - Reconnaissance (80 tools) DONE
+[x] Phase 02 - Resource Development (34 tools) DONE
+[ ] Phase 03 - Initial Access (10 tools) IN PROGRESS
+[ ] Phase 04 - Execution (6 tools)
+[ ] Phase 05 - Persistence (7 tools)
+[ ] Phase 06 - Privilege Escalation (6 tools)
+[ ] Phase 07 - Defense Evasion (16 tools)
+[ ] Phase 08 - Credential Access (52 tools)
+[ ] Phase 09 - Discovery (88 tools)
+[ ] Phase 10 - Lateral Movement (3 tools)
+[ ] Phase 11 - Collection (12 tools)
+[ ] Phase 12 - Command and Control (30 tools)
+[ ] Phase 13 - Exfiltration (3 tools)
+[ ] Phase 14 - Impact (10 tools)
+[ ] Phase 15 - Forensics (51 tools)
+[ ] Phase 16 - Services and Other (15 tools)
 ```
 
-### Intermediate Track (100-120 hours)
-```
-1. Phase 01 -> All 80 reconnaissance tools
-2. Phase 02 -> All 34 resource development tools
-3. Practice in lab environments (HackTheBox, TryHackMe)
-```
+**Contributions welcome!** See [CONTRIBUTING.md](CONTRIBUTING.md) if you want to help document a tool.
 
-### Advanced Track (200+ hours)
+---
+
+## Phase 01 - Reconnaissance (Complete)
+
+80 tools covering network scanning, web vulnerability assessment, OSINT, DNS enumeration, Bluetooth, WiFi, and radio frequency analysis.
+
+### Top Tools by Documentation Depth
+
+| Tool | Lines | What It Covers |
+|------|-------|----------------|
+| **Autorecon** | 3,631 | Automated network recon with service enumeration |
+| **Amass** | 2,121 | In-depth attack surface mapping |
+| **Metagoofil** | 2,076 | Public file metadata extraction |
+| **EmailHarvester** | 1,893 | Email address enumeration |
+| **Nmap** | 1,048 | Port scanning, service detection, OS fingerprinting |
+| **Gobuster** | 1,182 | Directory and subdomain brute forcing |
+| **Nuclei** | 1,249 | Template-based vulnerability scanning |
+| **Burp Suite** | 1,079 | Web application security testing |
+| **FFuf** | 1,143 | Fast web fuzzing |
+| **Sherlock** | 613 | Username OSINT across 400+ platforms |
+
+---
+
+## Phase 02 - Resource Development (Complete)
+
+34 tools for reverse engineering, exploit development, fuzzing, Android analysis, and payload generation.
+
+### Top Tools
+
+| Tool | Lines | What It Covers |
+|------|-------|----------------|
+| **MSFvenom** | 907 | Payload generation, encoders, output formats |
+| **GDB** | 816 | GNU Debugger, breakpoints, memory inspection |
+| **Ghidra** | 675 | NSA reverse engineering suite, decompilation |
+| **AFL** | 602 | Coverage-guided fuzzing |
+| **VEIL** | 603 | AV evasion payload generation |
+| **Shellter** | 598 | Shellcode injection into PE files |
+| **JADX** | 520 | Android APK decompilation |
+| **Radare2** | 534 | Reverse engineering framework |
+
+---
+
+## How Every Tool Is Documented
+
+Each tool follows a consistent 8-chapter structure:
+
+| Chapter | What You Learn |
+|---------|---------------|
+| 1. Introduction | What it is, when to use it, key concepts |
+| 2. Installation | APT, source, Docker setup with verification |
+| 3. Basic Usage | First run, essential commands, complete flag reference |
+| 4. Intermediate | Scripting, automation, tool chaining |
+| 5. Advanced | Custom techniques, evasion, workflow integration |
+| 6. Scenarios | Real-world audit, CTF, and bug bounty walkthroughs |
+| 7. Detection | How defenders catch it, signatures, mitigation |
+| 8. Troubleshooting | Common errors, FAQ, performance tips |
+
+Plus a **CHEATSHEET.md** in every tool directory for quick reference.
+
+---
+
+## Getting Started
+
+### For Learning
+Start with Phase 01 tools in order. Each tool builds on the previous ones.
+
+### For Quick Reference
+Check the [CHEATSHEET.md](CHEATSHEET.md) for a consolidated quick-reference of all tools.
+
+### For a Specific Tool
+Navigate to the tool directory:
 ```
-1. Complete all phases
-2. Custom tool development
-3. Red team operations methodology
+01_reconnaissance/03_network_information/nmap/nmap.md
 ```
 
 ---
 
-## Phase 01 — Reconnaissance (80 Tools, 75,606 Lines)
+## Who Is This For?
 
-```
-████████████████████████████████████████████████████████  80/80 tools
-```
-
-| Tool | Lines | Category | Tool | Lines | Category |
-|------|-------|----------|------|-------|----------|
-| **Autorecon** | 3,631 | Network Info | **Gobuster** | 1,182 | Web Scan |
-| **Amass** | 2,121 | Network Info | **DNSMap** | 1,059 | DNS Recon |
-| **Metagoofil** | 2,076 | Host Info | **Nmap** | 1,048 | Network Info |
-| **EmailHarvester** | 1,893 | Identity | **CRLFuzz** | 1,045 | Web Vuln |
-| **Instaloader** | 1,795 | Identity | **FinalRecon** | 1,033 | Web Scan |
-| **DNSRecon** | 1,282 | DNS Recon | **RFcat** | 1,019 | RF |
-| **GnuRadio** | 1,258 | RF | **Findomain** | 1,008 | Web Scan |
-| **Nuclei** | 1,249 | Web Vuln | **Kismet** | 999 | WiFi |
-| **DNSEnum** | 1,241 | DNS Recon | **Recon-ng** | 988 | Web Scan |
-| **DNSTracer** | 1,028 | DNS Recon | **Arjun** | 944 | Web Scan |
-| **MassDNS** | 1,136 | DNS Recon | **Wfuzz** | 910 | Web Scan |
-| **Subfinder** | 1,122 | Web Scan | **Sublist3r** | 902 | Web Scan |
-| **DavTest** | 1,148 | Web Vuln | **TheHarvester** | 886 | Network Info |
-| **FFuf** | 1,143 | Web Scan | **Skipfish** | 879 | Web Vuln |
-| **Feroxbuster** | 1,128 | Web Scan | **LBD** | 1,014 | Web Scan |
-| **JoomScan** | 1,114 | Web Vuln | **Ubertooth-Util** | 847 | Bluetooth |
-| **Burp Suite** | 1,079 | Web Vuln | **Wash** | 845 | WiFi |
-| **Caido** | 1,079 | Web Vuln | **DirSearch** | 842 | Web Scan |
-| **GoSpider** | 1,065 | Web Scan | **Wapiti** | 840 | Web Vuln |
-| **Heartleech** | 819 | Vuln Scan | **Chirp** | 839 | RF |
-| **WPScan** | 1,011 | Web Vuln | **SSTImap** | 823 | Web Vuln |
-| **DNSWalk** | 1,185 | DNS Recon | **Tinja** | 822 | Web Vuln |
-| **WhatWeb** | 772 | Web Vuln | **Subjack** | 813 | Web Vuln |
-| **Parsero** | 746 | Web Scan | **Unicornscan** | 802 | Network Info |
-| **WPProbe** | 751 | Web Scan | **Bettercap** | 801 | Bluetooth |
-| **URLCrazy** | 642 | Web Scan | **Sparrow-WiFi** | 796 | WiFi |
-| **SpiderFoot** | 629 | Host Info | **Dirb** | 783 | Web Scan |
-| **Sherlock** | 613 | Identity | **Gqrx** | 766 | RF |
-| **Tookie-OSINT** | 546 | Identity | **Assetfinder** | 758 | Web Scan |
-| **Uro** | 526 | Web Scan | **Bluesnarfer** | 732 | Bluetooth |
-| **GVM** | 519 | Vuln Scan | **HackRF** | 716 | RF |
-| **ZAProxy** | 517 | Web Vuln | **BTScanner** | 716 | Bluetooth |
-| **Photon** | 510 | Identity | **Paros** | 706 | Web Vuln |
-| **LinkedIn2Username** | 501 | Identity | **WCVS** | 689 | Web Vuln |
-| **Dmitry** | 535 | Network Info | **Spooftooph** | 667 | Bluetooth |
-| **Legion** | 523 | Network Info | **BlueLog** | 665 | Bluetooth |
-| **DNSSub** | 1,122 | Web Scan | **WebScarab** | 641 | Web Vuln |
-| **Zenmap** | 598 | Network Info | **Watobo** | 628 | Web Vuln |
-| **Asleap** | 617 | WiFi | **RedFang** | 617 | Bluetooth |
-| **DirBuster** | 616 | Web Scan | **BlueRanger** | 603 | Bluetooth |
+- **Students** learning cybersecurity and penetration testing
+- **CTF players** looking for tool references during competitions
+- **Bug bounty hunters** wanting comprehensive tool documentation
+- **Pentesters** needing a quick reference for tools they don't use daily
+- **Blue teamers** wanting to understand attacker tools for detection
+- **Anyone** who wants to learn Kali Linux tools from scratch
 
 ---
 
-## Phase 02 — Resource Development (34 Tools, 21,292 Lines)
+## Contributing
 
-```
-████████████████████████████████████████████████████████  34/34 tools
-```
+This project is actively developing. Contributions are welcome:
 
-### By Subcategory
+1. Pick a tool that needs documentation
+2. Follow the 8-chapter template
+3. Submit a pull request
 
-| Subcategory | Tools | Top Tools |
-|-------------|-------|-----------|
-| Disassemblers & Debuggers | 10 | GDB (816), Ghidra (675), Rizin (589), GEF (578) |
-| Exploit Resources | 3 | SearchSploit (442), ExploitDB (413), Pompem (330) |
-| Fuzzing | 4 | AFL (602), Spike (414), SFuzz (373), BED (351) |
-| Java & Android Reversing | 6 | JADX (520), Apktool (491), Bytecode-Viewer (421) |
-| Shellcode & Payload Generation | 11 | MSFvenom (907), Veil (603), Shellter (598), Donut (580) |
-
-### All 34 Tools
-
-| Tool | Lines | Category | Tool | Lines | Category |
-|------|-------|----------|------|-------|----------|
-| **MSFvenom** | 907 | Shellcode | **Ghidra** | 675 | Disassembler |
-| **GDB** | 816 | Debugger | **VEIL** | 603 | Shellcode |
-| **AFL** | 602 | Fuzzing | **Shellter** | 598 | Shellcode |
-| **Rizin** | 589 | Debugger | **Donut** | 580 | Shellcode |
-| **GEF** | 578 | Debugger | **Capstone** | 547 | Disassembler |
-| **Radare2** | 534 | RE Framework | **JADX** | 520 | Android RE |
-| **Backdoor-Factory** | 514 | Shellcode | **ShellNoob** | 506 | Shellcode |
-| **Apktool** | 491 | Android RE | **Cymothoa** | 485 | Shellcode |
-| **Cutter** | 444 | RE GUI | **SearchSploit** | 442 | Exploit DB |
-| **MSF-NASM** | 436 | Shellcode | **Bytecode-Viewer** | 421 | Java RE |
-| **Spike** | 414 | Fuzzing | **ExploitDB** | 413 | Exploit DB |
-| **EDB-Debugger** | 415 | Debugger | **EXE2HEX** | 401 | Shellcode |
-| **Sickle-PDK** | 396 | Shellcode | **DEX2JAR** | 393 | Android RE |
-| **MSFPC** | 389 | Shellcode | **RecStudio** | 376 | Binary Analysis |
-| **SFuzz** | 373 | Fuzzing | **JD-GUI** | 352 | Java RE |
-| **BED** | 351 | Fuzzing | **OllyDbg** | 350 | Debugger |
-| **Pompem** | 330 | Exploit Search | **JavaSnoop** | 301 | Java RE |
-
----
-
-## Documentation Structure
-
-Every tool follows an **8-chapter template**:
-
-```
-tool-name.md
-+-- Chapter 1: Introduction & Overview
-|   +-- What is it?
-|   +-- History & Background
-|   +-- When to Use / When NOT to Use
-|   +-- Legal & Ethical Considerations
-|   +-- Key Concepts
-+-- Chapter 2: Installation & Setup
-|   +-- System Requirements
-|   +-- Installation Methods (APT, Source, Docker)
-|   +-- Configuration
-|   +-- Verification
-+-- Chapter 3: Basic Usage
-|   +-- First Run (with sample output)
-|   +-- Essential Commands (5-10+)
-|   +-- COMPLETE Flag Reference Tables
-|   +-- Output Format Explanation
-+-- Chapter 4: Intermediate Usage
-|   +-- Bash Scripting & Automation
-|   +-- Python Scripting
-|   +-- Tool Chaining
-|   +-- Output Processing
-+-- Chapter 5: Advanced Usage
-|   +-- Custom Configurations
-|   +-- Evasion Techniques
-|   +-- Pentest Workflow Integration
-|   +-- Custom Modules/Extensions
-+-- Chapter 6: Real-World Scenarios
-|   +-- Scenario 1: Security Audit (step-by-step)
-|   +-- Scenario 2: CTF Challenge
-|   +-- Scenario 3: Bug Bounty
-+-- Chapter 7: Detection & Defense
-|   +-- How Defenders Detect This Tool
-|   +-- IDS/IPS Signatures
-|   +-- Mitigation Strategies
-|   +-- Blue Team Response Playbook
-+-- Chapter 8: Troubleshooting
-|   +-- Common Errors & Solutions
-|   +-- Performance Optimization
-|   +-- FAQ
-+-- Resources
-    +-- Official Documentation
-    +-- Books & Courses
-    +-- Practice Labs
-    +-- Related Tools
-```
-
-Plus a **CHEATSHEET.md** in every tool directory for quick field reference.
-
----
-
-## Built With
-
-- **Framework:** MITRE ATT&CK (16 Tactics)
-- **Sources:** Kali.org, GitHub, Man Pages, NVD, MITRE
-- **Format:** Markdown with YAML frontmatter
-- **Quality Standard:** 500-3,600+ lines per tool
-- **Documentation:** 8-chapter template with real examples
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
 ## License
 
-This project is for **educational purposes only**. Always obtain proper authorization before testing on any systems you do not own.
+MIT License - see [LICENSE](LICENSE) for details.
+
+Educational purposes only. Always get authorization before testing systems you don't own.
 
 ---
 
 <div align="center">
 
-### Progress
+### Star History
 
-If this resource helps you learn, consider giving it a star
+If this helps your learning, give it a star. It motivates more content.
 
-**Phase 01: Complete** | **Phase 02: Complete** | Phase 03: Coming Soon
+**Phase 01: Done** | **Phase 02: Done** | **Phase 03: In Progress**
+
+[Back to Top](#kali-linux-tools---the-complete-learning-repository)
 
 </div>
