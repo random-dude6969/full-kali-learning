@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="headeroftherepo.png" width="100%" alt="Kali Linux Tools - Complete Educational Documentation">
+
 # Kali Linux Tools - The Complete Learning Repository
 
 ### From Zero to Expert - Master Every Tool, Every Technique
@@ -11,6 +13,7 @@
 [![Phase](https://img.shields.io/badge/Phase%2002-Complete-brightgreen?style=for-the-badge)](#phase-02--resource-development)
 [![WIP](https://img.shields.io/badge/Status-Active%20Development-yellow?style=for-the-badge)](#roadmap)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge)](CONTRIBUTING.md)
 
 ---
 
@@ -35,6 +38,7 @@ Most Kali tool docs are either too shallow (a few commands) or too scattered (ra
 - **Beginner to advanced** - each tool starts simple and builds up
 - **CTF and bug bounty focused** - scenarios you'll actually encounter
 - **Blue team included** - detection and defense sections for every tool
+- **Consistent format** - every tool looks the same, so you always know where to find what
 
 ---
 
@@ -66,7 +70,7 @@ Most Kali tool docs are either too shallow (a few commands) or too scattered (ra
 ```
 [x] Phase 01 - Reconnaissance (80 tools) DONE
 [x] Phase 02 - Resource Development (34 tools) DONE
-[ ] Phase 03 - Initial Access (10 tools) IN PROGRESS
+[ ] Phase 03 - Initial Access (10 tools) NEXT
 [ ] Phase 04 - Execution (6 tools)
 [ ] Phase 05 - Persistence (7 tools)
 [ ] Phase 06 - Privilege Escalation (6 tools)
@@ -130,18 +134,43 @@ Most Kali tool docs are either too shallow (a few commands) or too scattered (ra
 
 Each tool follows a consistent 8-chapter structure:
 
-| Chapter | What You Learn |
-|---------|---------------|
-| 1. Introduction | What it is, when to use it, key concepts |
-| 2. Installation | APT, source, Docker setup with verification |
-| 3. Basic Usage | First run, essential commands, complete flag reference |
-| 4. Intermediate | Scripting, automation, tool chaining |
-| 5. Advanced | Custom techniques, evasion, workflow integration |
-| 6. Scenarios | Real-world audit, CTF, and bug bounty walkthroughs |
-| 7. Detection | How defenders catch it, signatures, mitigation |
-| 8. Troubleshooting | Common errors, FAQ, performance tips |
+```
+tool-name.md
++-- Chapter 1: Introduction & Overview
+|   +-- What is it?
+|   +-- History & Background
+|   +-- When to Use / When NOT to Use
+|   +-- Key Concepts
++-- Chapter 2: Installation & Setup
+|   +-- System Requirements
+|   +-- Installation Methods (APT, Source, Docker)
+|   +-- Verification
++-- Chapter 3: Basic Usage
+|   +-- First Run (with sample output)
+|   +-- Essential Commands (5-10+)
+|   +-- COMPLETE Flag Reference Tables
++-- Chapter 4: Intermediate Usage
+|   +-- Bash Scripting & Automation
+|   +-- Python Scripting
+|   +-- Tool Chaining
++-- Chapter 5: Advanced Usage
+|   +-- Custom Techniques
+|   +-- Evasion Techniques
+|   +-- Pentest Workflow Integration
++-- Chapter 6: Real-World Scenarios
+|   +-- Security Audit walkthrough
+|   +-- CTF Challenge
+|   +-- Bug Bounty
++-- Chapter 7: Detection & Defense
+|   +-- How Defenders Detect It
+|   +-- IDS/IPS Signatures
+|   +-- Blue Team Response
++-- Chapter 8: Troubleshooting
+    +-- Common Errors & Solutions
+    +-- FAQ
+```
 
-Plus a **CHEATSHEET.md** in every tool directory for quick reference.
+Plus a **CHEATSHEET.md** in every tool directory for quick field reference.
 
 ---
 
@@ -168,6 +197,7 @@ Navigate to the tool directory:
 - **Bug bounty hunters** wanting comprehensive tool documentation
 - **Pentesters** needing a quick reference for tools they don't use daily
 - **Blue teamers** wanting to understand attacker tools for detection
+- **OSCP/GPEN/CEH candidates** preparing for certifications
 - **Anyone** who wants to learn Kali Linux tools from scratch
 
 ---
