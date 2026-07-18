@@ -1,501 +1,277 @@
 <div align="center">
 
-<img src="headeroftherepo.png" width="100%" alt="Kali Linux Tools - Complete Educational Documentation">
+<img src="headeroftherepo.png" width="100%" alt="Kali Linux Tools">
 
-<img src="star.png" width="600" alt="Give a Star for this repo">
+<br>
 
-# Kali Linux Tools - Complete Documentation & Tutorial
+# THE ULTIMATE KALI LINUX TOOLS REPOSITORY
 
-### The Ultimate Kali Linux Commands Cheat Sheet and Penetration Testing Guide
+<br>
 
-[![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-16%20Tactics-blue?style=for-the-badge&logo=mitreattack&logoColor=white)](https://attack.mitre.org/)
-[![Tools](https://img.shields.io/badge/Tools-432%2B-red?style=for-the-badge&logo=kali-linux&logoColor=white)](#full-tool-list)
-[![Lines](https://img.shields.io/badge/Lines-115K%2B-green?style=for-the-badge)](#)
-[![Phase](https://img.shields.io/badge/Phase%2001-Complete-brightgreen?style=for-the-badge)](#phase-01--reconnaissance-80-tools)
-[![Phase](https://img.shields.io/badge/Phase%2002-Complete-brightgreen?style=for-the-badge)](#phase-02--resource-development-34-tools)
-[![Phase](https://img.shields.io/badge/Phase%2003-Complete-brightgreen?style=for-the-badge)](#phase-03--initial-access-10-tools)
-[![WIP](https://img.shields.io/badge/Status-Active%20Development-yellow?style=for-the-badge)](#roadmap)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
- [![Stars](https://img.shields.io/github/stars/random-dude6969/full-kali-learning?style=for-the-badge[![PRs]logo=github[![PRs]logoColor=white)](https://github.com/random-dude6969/full-kali-learning/stargazers)
-[![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge)](CONTRIBUTING.md)
+### 432+ Penetration Testing Tools | Step-by-Step Tutorials | Real-World Examples
+
+<br>
+
+![GitHub Stars](https://img.shields.io/github/stars/random-dude6969/full-kali-learning?style=social&label=Stars)
+![GitHub Forks](https://img.shields.io/github/forks/random-dude6969/full-kali-learning?style=social&label=Forks)
+![GitHub Watchers](https://img.shields.io/github/watchers/random-dude6969/full-kali-learning?style=social&label=Watchers)
+
+![Tools](https://img.shields.io/badge/Tools-432%2B-red?style=flat-square&logo=kali-linux&logoColor=white)
+![Lines](https://img.shields.io/badge/Lines-140K%2B-green?style=flat-square)
+![Phases](https://img.shields.io/badge/Phases-7%2F16-blue?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square)
 
 ---
 
-**432+ Kali Linux tools documented with tutorials, commands, and examples.**
+**The largest collection of Kali Linux tool documentation on GitHub.**
 
-The most complete penetration testing tools list with step-by-step guides.
-From nmap scanning to metasploit exploitation — everything you need to learn ethical hacking.
+Every tool documented from zero to expert with:
+- Installation guides
+- Command references with explanations
+- Real-world penetration testing scenarios
+- CTF and bug bounty walkthroughs
+- Detection and defense for blue teams
 
-**Star this repo** to save it for later. New tools added weekly.
+<br>
+
+<img src="star.png" width="500" alt="Star this repo">
+
+**Star this repo** to bookmark it. New tools added every week.
 
 </div>
 
 ---
 
-## Table of Contents
+## What Makes This Different?
 
-- [What Is This Repo?](#what-is-this-repo)
-- [Why Star This Repo?](#why-star-this-repo)
-- [Quick Start](#quick-start)
-- [Phase 01 - Reconnaissance (80 Tools)](#phase-01--reconnaissance-80-tools)
-- [Phase 02 - Resource Development (34 Tools)](#phase-02--resource-development-34-tools)
-- [Phase 03 - Initial Access (10 Tools)](#phase-03--initial-access-10-tools)
-- [All Phases Overview](#all-phases-overview)
-- [Kali Linux Commands Cheat Sheet](#kali-linux-commands-cheat-sheet)
-- [Best Kali Tools for Beginners](#best-kali-tools-for-beginners)
-- [OSCP Study Guide Tools](#oscp-study-guide-tools)
-- [CTF Tools](#ctf-tools)
-- [Bug Bounty Tools](#bug-bounty-tools)
-- [Web Application Security Tools](#web-application-security-tools)
-- [How Every Tool Is Documented](#how-every-tool-is-documented)
-- [Who Is This For?](#who-is-this-for)
-- [Frequently Asked Questions](#frequently-asked-questions)
-- [Contributing](#contributing)
-- [License](#license)
+Most tool lists just link to projects. This repo gives you **complete documentation** for every tool:
+
+| Feature | Other Repos | This Repo |
+|---------|-------------|-----------|
+| Tool links | Yes | Yes |
+| Installation guides | Sometimes | Every tool |
+| Command examples | Rarely | Every tool with explanations |
+| Real-world scenarios | No | 3+ per tool |
+| Cheat sheets | No | Every tool |
+| Beginner to advanced | No | Structured progression |
+| MITRE ATT&CK mapped | No | Every tool |
+| Blue team sections | No | Detection & defense included |
 
 ---
 
-## What Is This Repo?
+## Quick Reference
 
-This is a complete collection of **Kali Linux penetration testing tools** with documentation, tutorials, and command references. Every tool is documented from beginner to advanced level.
+### Most Popular Tools
 
-Whether you are preparing for **OSCP**, **CEH**, **GPEN**, or just learning **ethical hacking**, this repo has you covered. Each tool includes:
-
-- Installation guide (APT, source, Docker)
-- Basic to advanced commands with explanations
-- Real-world penetration testing scenarios
-- CTF and bug bounty walkthroughs
-- Detection and defense for blue teams
-
----
-
-## Why Star This Repo?
-
-- **432+ tools** — the largest Kali Linux tool documentation collection on GitHub
-- **115,000+ lines** of tutorials and examples
-- **8-chapter format** per tool — not just a man page reprint
-- **MITRE ATT&CK organized** — follow the same framework used by professionals
-- **Beginner friendly** — starts simple, builds to advanced
-- **Regular updates** — new tools added every week
+| Tool | Phase | Lines | What It Does |
+|------|-------|-------|--------------|
+| **[Nmap](01_reconnaissance/03_network_information/nmap/nmap.md)** | 01 | 1,048 | Port scanning, service detection, OS fingerprinting |
+| **[Metasploit](03_initial_access/metasploit-framework/metasploit-framework.md)** | 03 | 632 | Exploitation framework |
+| **[SQLMap](03_initial_access/sqlmap/sqlmap.md)** | 03 | 891 | SQL injection automation |
+| **[Gobuster](01_reconnaissance/05_web_scanning/gobuster/gobuster.md)** | 01 | 1,182 | Directory brute forcing |
+| **[Burp Suite](01_reconnaissance/07_web_vulnerability_scanning/burpsuite/burpsuite.md)** | 01 | 1,079 | Web application testing |
+| **[Mimikatz](07_defense_evasion/pass_the_hash/mimikatz/mimikatz.md)** | 07 | 564 | Credential dumping |
+| **[MSFvenom](02_resource_development/shellcode_payload/msfvenom/msfvenom.md)** | 02 | 907 | Payload generation |
+| **[Ghidra](02_resource_development/disassemblers_debuggers/ghidra/ghidra.md)** | 02 | 675 | Reverse engineering |
+| **[LinPEAS](06_privilege_escalation/linpeas/linpeas.md)** | 06 | 574 | Linux privilege escalation |
+| **[BloodHound](06_privilege_escalation/bloodyad/bloodyad.md)** | 06 | 746 | Active Directory analysis |
 
 ---
 
-## Quick Start
+## Complete Phase Overview
 
-### For Beginners
-Start with these essential Kali Linux tools:
+| Phase | Name | Tools | Status | Key Tools |
+|-------|------|-------|--------|-----------|
+| 01 | [Reconnaissance](01_reconnaissance/) | 80 | DONE | Nmap, Gobuster, Burp Suite, Nuclei |
+| 02 | [Resource Development](02_resource_development/) | 34 | DONE | Ghidra, MSFvenom, AFL, Radare2 |
+| 03 | [Initial Access](03_initial_access/) | 10 | DONE | SQLMap, Metasploit, GoPhish |
+| 04 | [Execution](04_execution/) | 6 | DONE | BeEF, XSSer, PowerSploit |
+| 05 | [Persistence](05_persistence/) | 7 | DONE | Weevely, Laudanum, PHPGGC |
+| 06 | [Privilege Escalation](06_privilege_escalation/) | 6 | DONE | LinPEAS, WinPEAS, Lynis |
+| 07 | [Defense Evasion](07_defense_evasion/) | 16 | DONE | Mimikatz, Impacket, Veil |
+| 08 | Credential Access | 52 | Coming | Hydra, John, Hashcat |
+| 09 | Discovery | 88 | Coming | BloodHound, CrackMapExec |
+| 10 | Lateral Movement | 3 | Coming | PsExec, WMI |
+| 11 | Collection | 12 | Coming | Keyloggers, Screen capture |
+| 12 | Command and Control | 30 | Coming | C2 frameworks |
+| 13 | Exfiltration | 3 | Coming | Data exfil tools |
+| 14 | Impact | 10 | Coming | Destructive tools |
+| 15 | Forensics | 51 | Coming | Volatility, Autopsy |
+| 16 | Services | 15 | Coming | Network services |
 
-1. **Nmap** — [Network scanning tutorial](01_reconnaissance/03_network_information/nmap/nmap.md)
-2. **Gobuster** — [Directory brute forcing](01_reconnaissance/05_web_scanning/gobuster/gobuster.md)
-3. **SQLMap** — [SQL injection automation](03_initial_access/sqlmap/sqlmap.md)
-4. **Metasploit** — [Exploitation framework](03_initial_access/metasploit-framework/metasploit-framework.md)
-5. **Hydra** — [Password brute forcing](08_credential_access/)
-
-### For CTF Players
-See [CTF Tools](#ctf-tools) section below.
-
-### For Bug Bounty
-See [Bug Bounty Tools](#bug-bounty-tools) section below.
-
----
-
-## Phase 01 - Reconnaissance (80 Tools)
-
-The first phase of any penetration test. Learn to discover hosts, enumerate services, and map attack surfaces.
-
-### Network Scanning Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**Nmap**](01_reconnaissance/03_network_information/nmap/nmap.md) | 1,048 | Port scanning, service detection, OS fingerprinting |
-| [**Autorecon**](01_reconnaissance/03_network_information/autorecon/autorecon.md) | 3,631 | Automated network reconnaissance |
-| [**Amass**](01_reconnaissance/03_network_information/amass/amass.md) | 2,121 | Attack surface mapping and DNS enumeration |
-| [**Unicornscan**](01_reconnaissance/03_network_information/unicornscan/unicornscan.md) | 802 | Asynchronous TCP/UDP scanner |
-
-### Web Vulnerability Scanning Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**Burp Suite**](01_reconnaissance/07_web_vulnerability_scanning/burpsuite/burpsuite.md) | 1,079 | Web application security testing |
-| [**Nuclei**](01_reconnaissance/07_web_vulnerability_scanning/nuclei/nuclei.md) | 1,249 | Template-based vulnerability scanner |
-| [**Nikto**](01_reconnaissance/07_web_vulnerability_scanning/nikto/nikto.md) | - | Web server scanner |
-| [**ZAP**](01_reconnaissance/07_web_vulnerability_scanning/zaproxy/zaproxy.md) | 517 | OWASP Zed Attack Proxy |
-
-### Directory and Subdomain Brute Forcing
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**Gobuster**](01_reconnaissance/05_web_scanning/gobuster/gobuster.md) | 1,182 | Directory, DNS, and vhost brute forcing |
-| [**FFuf**](01_reconnaissance/05_web_scanning/ffuf/ffuf.md) | 1,143 | Fast web fuzzer |
-| [**Feroxbuster**](01_reconnaissance/05_web_scanning/feroxbuster/feroxbuster.md) | 1,128 | Recursive content discovery |
-| [**Dirsearch**](01_reconnaissance/05_web_scanning/dirsearch/dirsearch.md) | 842 | Web path scanner |
-
-### OSINT Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**Sherlock**](01_reconnaissance/02_identity_information/sherlock/sherlock.md) | 613 | Username search across 400+ social networks |
-| [**TheHarvester**](01_reconnaissance/03_network_information/theharvester/theharvester.md) | 886 | Email and subdomain enumeration |
-| [**SpiderFoot**](01_reconnaissance/01_host_information/spiderfoot/spiderfoot.md) | 629 | OSINT automation |
-| [**Metagoofil**](01_reconnaissance/01_host_information/metagoofil/metagoofil.md) | 2,076 | Public document metadata extraction |
-
-### DNS Enumeration Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**DNSRecon**](01_reconnaissance/04_dns_reconnaissance/dnsrecon/dnsrecon.md) | 1,282 | DNS enumeration and zone walking |
-| [**DNSEnum**](01_reconnaissance/04_dns_reconnaissance/dnsenum/dnsenum.md) | 1,241 | DNS enumeration script |
-| [**DNSMap**](01_reconnaissance/04_dns_reconnaissance/dnsmap/dnsmap.md) | 1,059 | DNS bruteforcing and subdomain scanning |
-
-### Bluetooth and WiFi Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**Bettercap**](01_reconnaissance/08_bluetooth/bettercap/bettercap.md) | 801 | Network attack and monitoring |
-| [**Kismet**](01_reconnaissance/09_wifi/kismet/kismet.md) | 999 | Wireless network detector |
-| [**Aircrack-ng**](01_reconnaissance/09_wifi/) | - | WiFi security assessment |
-
-### Radio Frequency Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**HackRF**](01_reconnaissance/10_radio_frequency/hackrf/hackrf.md) | 716 | SDR transceiver |
-| [**GnuRadio**](01_reconnaissance/10_radio_frequency/gnuradio/gnuradio.md) | 1,258 | Signal processing framework |
-
----
-
-## Phase 02 - Resource Development (34 Tools)
-
-Build your exploitation toolkit. Learn reverse engineering, fuzzing, and payload generation.
-
-### Reverse Engineering Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**Ghidra**](02_resource_development/disassemblers_debuggers/ghidra/ghidra.md) | 675 | NSA reverse engineering suite |
-| [**GDB**](02_resource_development/disassemblers_debuggers/gdb/gdb.md) | 816 | GNU Debugger |
-| [**Radare2**](02_resource_development/disassemblers_debuggers/radare2/radare2.md) | 534 | Reverse engineering framework |
-| [**Rizin**](02_resource_development/disassemblers_debuggers/rizin/rizin.md) | 589 | Radare2 fork |
-| [**GEF**](02_resource_development/disassemblers_debuggers/gef/gef.md) | 578 | GDB Enhanced Features |
-
-### Payload Generation Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**MSFvenom**](02_resource_development/shellcode_payload/msfvenom/msfvenom.md) | 907 | Metasploit payload generator |
-| [**Veil**](02_resource_development/shellcode_payload/veil/veil.md) | 603 | AV evasion payload generator |
-| [**Shellter**](02_resource_development/shellcode_payload/shellter/shellter.md) | 598 | Shellcode injection into PE files |
-| [**Donut**](02_resource_development/shellcode_payload/donut/donut.md) | 580 | .NET shellcode generator |
-
-### Fuzzing Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**AFL**](02_resource_development/fuzzing/afl-fuzz/afl-fuzz.md) | 602 | Coverage-guided fuzzer |
-| [**Spike**](02_resource_development/fuzzing/spike/spike.md) | 414 | Network protocol fuzzer |
-
-### Android and Java Reverse Engineering
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**JADX**](02_resource_development/java_android_reversing/jadx/jadx.md) | 520 | APK to Java source decompiler |
-| [**Apktool**](02_resource_development/java_android_reversing/apktool/apktool.md) | 491 | APK reverse engineering |
-
----
-
-## Phase 03 - Initial Access (10 Tools)
-
-Gain initial access to target systems through exploitation and social engineering.
-
-### SQL Injection Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**SQLMap**](03_initial_access/sqlmap/sqlmap.md) | 891 | Automated SQL injection and database takeover |
-| [**SQLNinja**](03_initial_access/sqlninja/sqlninja.md) | 952 | SQL injection for MSSQL |
-| [**SQLSus**](03_initial_access/sqlsus/sqlsus.md) | 1,256 | MySQL injection tool |
-| [**jSQL**](03_initial_access/jsql/jsql.md) | 642 | Visual SQL injection |
-| [**Commix**](03_initial_access/commix/commix.md) | 759 | Command injection exploitation |
-
-### Exploitation Frameworks
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**Metasploit**](03_initial_access/metasploit-framework/metasploit-framework.md) | 632 | Penetration testing framework |
-| [**JBoss Autopwn**](03_initial_access/jboss-autopwn/jboss-autopwn.md) | 612 | JBoss server exploitation |
-
-### Social Engineering Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**SET Toolkit**](03_initial_access/setoolkit/setoolkit.md) | 511 | Social Engineering Toolkit |
-| [**GoPhish**](03_initial_access/gophish/gophish.md) | 959 | Phishing simulation platform |
-
-### DNS Attack Tools
-
-| Tool | Lines | What It Does |
-|------|-------|--------------|
-| [**DNS-Rebind**](03_initial_access/dns-rebind/dns-rebind.md) | 690 | DNS rebinding attack tool |
-
----
-
-## All Phases Overview
-
-| Phase | Name | Tools | Status |
-|-------|------|-------|--------|
-| 01 | [Reconnaissance](01_reconnaissance/) | 80 | **Complete** |
-| 02 | [Resource Development](02_resource_development/) | 34 | **Complete** |
-| 03 | [Initial Access](03_initial_access/) | 10 | **Complete** |
-| 04 | Execution | 6 | Developing |
-| 05 | Persistence | 7 | Developing |
-| 06 | Privilege Escalation | 6 | Developing |
-| 07 | Defense Evasion | 16 | Developing |
-| 08 | Credential Access | 52 | Developing |
-| 09 | Discovery | 88 | Developing |
-| 10 | Lateral Movement | 3 | Developing |
-| 11 | Collection | 12 | Developing |
-| 12 | Command and Control | 30 | Developing |
-| 13 | Exfiltration | 3 | Developing |
-| 14 | Impact | 10 | Developing |
-| 15 | Forensics | 51 | Developing |
-| 16 | Services and Other | 15 | Developing |
+**159 tools done. 273 remaining. Contributions welcome.**
 
 ---
 
 ## Kali Linux Commands Cheat Sheet
 
-Quick reference for the most used Kali Linux commands:
-
 ### Network Scanning
 ```bash
-nmap -sV -sC target           # Service version + default scripts
-nmap -p- target               # Scan all 65535 ports
-nmap -A target                # Aggressive scan (OS, version, scripts, traceroute)
+nmap -sV -sC target              # Version + default scripts
+nmap -p- -T4 target              # All ports, fast timing
+nmap -A --script vuln target     # Aggressive + vuln scripts
 ```
 
-### Directory Brute Forcing
+### Web Directory Discovery
 ```bash
-gobuster dir -u URL -w wordlist.txt           # Basic directory scan
-ffuf -u URL/FUZZ -w wordlist.txt              # Fast fuzzing
-feroxbuster -u URL -w wordlist.txt            # Recursive scan
+gobuster dir -u URL -w wordlist -x php,html    # Directory scan
+ffuf -u URL/FUZZ -w wordlist -mc 200            # Fast fuzzing
+feroxbuster -u URL -w wordlist -x               # Recursive scan
 ```
 
 ### SQL Injection
 ```bash
-sqlmap -u "URL?id=1" --dbs                    # Enumerate databases
-sqlmap -u "URL?id=1" -D dbname --tables       # Enumerate tables
-sqlmap -u "URL?id=1" -D dbname -T table --dump # Dump table data
+sqlmap -u "URL?id=1" --dbs                    # List databases
+sqlmap -u "URL?id=1" -D test --tables         # List tables
+sqlmap -u "URL?id=1" -D test -T users --dump  # Dump table
 ```
 
 ### Exploitation
 ```bash
-msfconsole                                   # Start Metasploit
-msfvenom -p payload LHOST=IP LPORT=PORT -f exe  # Generate payload
-searchsploit apache 2.4                       # Search ExploitDB
+msfconsole -x "use exploit/...; set RHOSTS target; run"
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=IP LPORT=PORT -f exe > shell.exe
+searchsploit apache 2.4
 ```
 
 ### Password Attacks
 ```bash
-hydra -l user -P wordlist.txt ssh://target     # SSH brute force
-john --wordlist=wordlist.txt hash.txt          # Crack hashes
-hashcat -m 0 hash.txt wordlist.txt             # GPU hash cracking
+hydra -l admin -P wordlist.txt ssh://target
+john --wordlist=rockyou.txt hashes.txt
+hashcat -m 1000 hashes.txt rockyou.txt
+```
+
+### Privilege Escalation
+```bash
+curl -L https://github.com/peass-ng/PEASS-ng/releases/latest/download/linpeas.sh | sh
+sudo lynis audit system
 ```
 
 ---
 
-## Best Kali Tools for Beginners
+## Best Tools for Beginners
 
-If you are just starting with Kali Linux and penetration testing, learn these tools first:
+Just starting with cybersecurity? Learn these first:
 
-1. **Nmap** — Every penetration test starts with network scanning
-2. **Gobuster** — Find hidden directories and files on web servers
+1. **Nmap** — Foundation of all network testing
+2. **Gobuster** — Find hidden content on websites
 3. **SQLMap** — Automate SQL injection attacks
-4. **Metasploit** — The most popular exploitation framework
-5. **Hydra** — Brute force login pages and services
-6. **Nikto** — Scan web servers for vulnerabilities
-7. **John the Ripper** — Crack password hashes
-8. **Wireshark** — Analyze network traffic
-
-See the [Beginner Track](#quick-start) for a structured learning path.
+4. **Metasploit** — The exploitation framework
+5. **Hydra** — Brute force login pages
+6. **Wireshark** — Analyze network traffic
 
 ---
 
-## OSCP Study Guide Tools
+## OSCP Study Guide
 
-Preparing for the **Offensive Security Certified Professional (OSCP)** exam? These are the tools you need to master:
+Preparing for the OSCP certification? These tools are essential:
 
-| Category | Tools |
-|----------|-------|
-| **Reconnaissance** | Nmap, Amass, Gobuster, FFuf |
-| **Web Attacks** | Burp Suite, SQLMap, Nikto |
-| **Exploitation** | Metasploit, MSFvenom, SearchSploit |
-| **Password Attacks** | Hydra, John, Hashcat |
-| **Privilege Escalation** | LinPEAS, WinPEAS, Linux Smart Enumeration |
-| **Post Exploitation** | Metasploit Meterpreter, Impacket |
-| **Reporting** | Documentation templates |
-
-Each tool above links to its full documentation in this repo.
+| Phase | Tools You Must Master |
+|-------|----------------------|
+| Recon | Nmap, Gobuster, FFuf |
+| Web | Burp Suite, SQLMap, Nikto |
+| Exploit | Metasploit, MSFvenom, SearchSploit |
+| Passwords | Hydra, John, Hashcat |
+| Privesc | LinPEAS, WinPEAS |
+| Post-Exploit | Meterpreter, Impacket |
 
 ---
 
-## CTF Tools
-
-Capture The Flag competitions require quick access to the right tools. Here are the most useful ones:
+## CTF Tools by Category
 
 | CTF Category | Tools |
 |--------------|-------|
-| **Web** | SQLMap, Gobuster, FFuf, Burp Suite, Nikto |
-| **Crypto** | CyberChef, John, Hashcat |
-| **Forensics** | Binwalk, Steghide, Volatility |
-| **Reverse Engineering** | GDB, GEF, Ghidra, Radare2, Rizin |
-| **Pwn** | GDB, GEF, MSFvenom, ROPgadget |
-| **OSINT** | Sherlock, TheHarvester, SpiderFoot |
+| Web | SQLMap, Gobuster, FFuf, Burp Suite, Nikto |
+| Crypto | John, Hashcat, CyberChef |
+| Forensics | Binwalk, Steghide, Volatility |
+| Reverse Engineering | GDB, GEF, Ghidra, Radare2 |
+| Pwn | GDB, GEF, MSFvenom, ROPgadget |
+| OSINT | Sherlock, TheHarvester, SpiderFoot |
 
 ---
 
-## Bug Bounty Tools
-
-Top tools for bug bounty programs:
+## Bug Bounty Toolkit
 
 | Category | Tools |
 |----------|-------|
-| **Recon** | Amass, Subfinder, Assetfinder, LinkFinder |
-| **Scanning** | Nuclei, Nmap, Masscan |
-| **Web** | Burp Suite, FFuf, Gobuster, Arjun |
-| **API** | Kiterunner, Arjun |
-| **Vuln Scanning** | Nuclei, Nikto, Wapiti |
+| Recon | Amass, Subfinder, Assetfinder |
+| Scanning | Nuclei, Nmap, Masscan |
+| Web | Burp Suite, FFuf, Gobuster |
+| API | Kiterunner, Arjun |
 
 ---
 
-## Web Application Security Tools
+## How Tools Are Documented
 
-Complete list of tools for testing web applications:
-
-| Tool | Use Case |
-|------|----------|
-| **Burp Suite** | Intercepting proxy, vulnerability scanning |
-| **SQLMap** | SQL injection detection and exploitation |
-| **Nikto** | Web server vulnerability scanning |
-| **Gobuster** | Directory and file discovery |
-| **FFuf** | Web fuzzing |
-| **Nuclei** | Template-based vulnerability scanning |
-| **Commix** | Command injection |
-| **XSSer** | Cross-site scripting detection |
-| **WPScan** | WordPress vulnerability scanning |
-
----
-
-## How Every Tool Is Documented
-
-Each tool follows a consistent 8-chapter structure:
+Every tool follows the same 8-chapter structure:
 
 ```
-tool-name.md
-+-- Chapter 1: Introduction & Overview
-|   +-- What is it?
-|   +-- History & Background
-|   +-- When to Use / When NOT to Use
-|   +-- Key Concepts
-+-- Chapter 2: Installation & Setup
-|   +-- System Requirements
-|   +-- Installation Methods (APT, Source, Docker)
-|   +-- Verification
-+-- Chapter 3: Basic Usage
-|   +-- First Run (with sample output)
-|   +-- Essential Commands (5-10+)
-|   +-- COMPLETE Flag Reference Tables
-+-- Chapter 4: Intermediate Usage
-|   +-- Bash Scripting & Automation
-|   +-- Python Scripting
-|   +-- Tool Chaining
-+-- Chapter 5: Advanced Usage
-|   +-- Custom Techniques
-|   +-- Evasion Techniques
-|   +-- Pentest Workflow Integration
-+-- Chapter 6: Real-World Scenarios
-|   +-- Security Audit walkthrough
-|   +-- CTF Challenge
-|   +-- Bug Bounty
-+-- Chapter 7: Detection & Defense
-|   +-- How Defenders Detect It
-|   +-- IDS/IPS Signatures
-|   +-- Blue Team Response
-+-- Chapter 8: Troubleshooting
-    +-- Common Errors & Solutions
-    +-- FAQ
+Chapter 1: Introduction & Overview
+Chapter 2: Installation & Setup
+Chapter 3: Basic Usage (with command examples)
+Chapter 4: Intermediate Usage (scripting, automation)
+Chapter 5: Advanced Usage (evasion, custom techniques)
+Chapter 6: Real-World Scenarios (audit, CTF, bug bounty)
+Chapter 7: Detection & Defense (blue team)
+Chapter 8: Troubleshooting (errors, FAQ)
 ```
 
-Plus a **CHEATSHEET.md** in every tool directory for quick field reference.
+Plus a **CHEATSHEET.md** for quick reference.
 
 ---
 
 ## Who Is This For?
 
-- **Students** learning cybersecurity and penetration testing
-- **CTF players** looking for tool references during competitions
-- **Bug bounty hunters** wanting comprehensive tool documentation
-- **Pentesters** needing a quick reference for tools they don't use daily
-- **Blue teamers** wanting to understand attacker tools for detection
-- **OSCP/GPEN/CEH candidates** preparing for certifications
-- **Anyone** who wants to learn Kali Linux tools from scratch
+- **Students** learning cybersecurity
+- **CTF players** needing tool references
+- **Bug bounty hunters** wanting comprehensive docs
+- **Pentesters** needing quick references
+- **OSCP/CEH/GPEN candidates** preparing for exams
+- **Blue teamers** understanding attacker tools
 
 ---
 
-## Frequently Asked Questions
+## Roadmap
 
-### What is Kali Linux?
-Kali Linux is a Debian-based Linux distribution designed for digital forensics and penetration testing. It comes with hundreds of security tools pre-installed.
-
-### What are the best Kali Linux tools for beginners?
-Start with Nmap, Gobuster, SQLMap, Metasploit, and Hydra. These cover the core skills needed for penetration testing.
-
-### Is this repo free?
-Yes. This repo is completely free and open source under the MIT License.
-
-### How often is this repo updated?
-New tools and documentation are added regularly. Check the [Roadmap](#roadmap) for what is coming next.
-
-### Can I use these tools legally?
-Only on systems you own or have written authorization to test. Unauthorized access to computer systems is illegal.
-
-### What is the difference between this repo and other Kali tool lists?
-Most lists just link to tools. This repo provides full documentation with tutorials, commands, examples, and real-world scenarios for every tool.
-
-### How do I contribute?
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+```
+[x] Phase 01 - Reconnaissance (80 tools) DONE
+[x] Phase 02 - Resource Development (34 tools) DONE
+[x] Phase 03 - Initial Access (10 tools) DONE
+[x] Phase 04 - Execution (6 tools) DONE
+[x] Phase 05 - Persistence (7 tools) DONE
+[x] Phase 06 - Privilege Escalation (6 tools) DONE
+[x] Phase 07 - Defense Evasion (16 tools) DONE
+[ ] Phase 08 - Credential Access (52 tools) NEXT
+[ ] Phase 09 - Discovery (88 tools)
+[ ] Phase 10 - Lateral Movement (3 tools)
+[ ] Phase 11 - Collection (12 tools)
+[ ] Phase 12 - Command and Control (30 tools)
+[ ] Phase 13 - Exfiltration (3 tools)
+[ ] Phase 14 - Impact (10 tools)
+[ ] Phase 15 - Forensics (51 tools)
+[ ] Phase 16 - Services and Other (15 tools)
+```
 
 ---
 
 ## Contributing
 
-This project is actively developing. Contributions are welcome:
-
-1. Pick a tool that needs documentation
-2. Follow the 8-chapter template
-3. Submit a pull request
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+Want to help document a tool? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
-Educational purposes only. Always get authorization before testing systems you don't own.
+MIT License. Educational purposes only.
 
 ---
 
 <div align="center">
 
-### Star This Repo
+### If this repo helps you, give it a star
 
-<img src="star.png" width="500" alt="Give a Star">
+It takes one click and motivates more content.
 
-If this helps your learning, give it a star. It motivates more content.
-
-**Phase 01: Done** | **Phase 02: Done** | **Phase 03: Done** | **Phase 04: Coming Next**
-
-[Back to Top](#kali-linux-tools---complete-documentation--tutorial)
+![Star History Chart](https://api.star-history.com/svg?repos=random-dude6969/full-kali-learning&type=Date)
 
 </div>
