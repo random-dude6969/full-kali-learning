@@ -16,6 +16,7 @@
 [![Phase](https://img.shields.io/badge/Phase%2003-Complete-brightgreen?style=for-the-badge)](#phase-03--initial-access-10-tools)
 [![WIP](https://img.shields.io/badge/Status-Active%20Development-yellow?style=for-the-badge)](#roadmap)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+ [![Stars](https://img.shields.io/github/stars/random-dude6969/full-kali-learning?style=for-the-badge[![PRs]logo=github[![PRs]logoColor=white)](https://github.com/random-dude6969/full-kali-learning/stargazers)
 [![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge)](CONTRIBUTING.md)
 
 ---
