@@ -10,9 +10,9 @@
 
 <br>
 
-![GitHub Stars](https://img.shields.io/github/stars/random-dude6969/full-kali-learning?style=social&label=Stars)
-![GitHub Forks](https://img.shields.io/github/forks/random-dude6969/full-kali-learning?style=social&label=Forks)
-![GitHub Watchers](https://img.shields.io/github/watchers/random-dude6969/full-kali-learning?style=social&label=Watchers)
+![GitHub Stars](https://img.shields.io/github/stars/random-dude6969/kali-linux-all-tools-tutorial?style=social&label=Stars)
+![GitHub Forks](https://img.shields.io/github/forks/random-dude6969/kali-linux-all-tools-tutorial?style=social&label=Forks)
+![GitHub Watchers](https://img.shields.io/github/watchers/random-dude6969/kali-linux-all-tools-tutorial?style=social&label=Watchers)
 
 ![Tools](https://img.shields.io/badge/Tools-299-red?style=flat-square&logo=kali-linux&logoColor=white)
 ![Lines](https://img.shields.io/badge/Lines-200K%2B-green?style=flat-square)
