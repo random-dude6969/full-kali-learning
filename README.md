@@ -14,9 +14,9 @@
 ![GitHub Forks](https://img.shields.io/github/forks/random-dude6969/kali-linux-all-tools-tutorial?style=social&label=Forks)
 ![GitHub Watchers](https://img.shields.io/github/watchers/random-dude6969/kali-linux-all-tools-tutorial?style=social&label=Watchers)
 
-![Tools](https://img.shields.io/badge/Tools-302-red?style=flat-square&logo=kali-linux&logoColor=white)
+![Tools](https://img.shields.io/badge/Tools-344-red?style=flat-square&logo=kali-linux&logoColor=white)
 ![Lines](https://img.shields.io/badge/Lines-200K%2B-green?style=flat-square)
-![Phases](https://img.shields.io/badge/Phases-10%2F16-blue?style=flat-square)
+![Phases](https://img.shields.io/badge/Phases-12%2F16-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 ![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square)
 
@@ -24,7 +24,7 @@
 
 **The most comprehensive Kali Linux tool documentation on GitHub.**
 
-302 penetration testing tools documented with step-by-step tutorials, command references, and real-world scenarios.
+344 penetration testing tools documented with step-by-step tutorials, command references, and real-world scenarios.
 
 From network scanning to exploitation to post-exploitation — complete guides for ethical hacking, CTF competitions, bug bounty, and security certifications.
 
@@ -58,7 +58,7 @@ From network scanning to exploitation to post-exploitation — complete guides f
 
 ## What Is This Project
 
-This repository contains documentation for **302 Kali Linux penetration testing tools**. Each tool is documented with:
+This repository contains documentation for **344 Kali Linux penetration testing tools**. Each tool is documented with:
 
 - **Installation guides** for APT, source, and Docker
 - **Command references** with explanations for every flag
@@ -155,8 +155,8 @@ The documentation follows the MITRE ATT&CK framework — 16 phases of a cyber at
 | 08 | [Credential Access](08_credential_access/) | 52 | DONE | Hydra, John, Hashcat, Responder |
 | 09 | [Discovery](09_discovery/) | 88 | DONE | Wireshark, BloodHound, Ettercap |
 | 10 | [Lateral Movement](10_lateral_movement/) | 3 | **Complete** | PsExec, SMBExec, RDesktop |
-| 11 | Collection | 12 | Coming | Keyloggers, Screen capture |
-| 12 | Command and Control | 30 | Coming | C2 frameworks |
+| 11 | [Collection](11_collection/) | 12 | DONE | Evilginx2, mitmproxy, SSLsplit |
+| 12 | [Command and Control](12_command_and_control/) | 30 | DONE | Havoc, Empire, Chisel |
 | 13 | Exfiltration | 3 | Coming | Data exfil tools |
 | 14 | Impact | 10 | Coming | DDoS, Destructive tools |
 | 15 | Forensics | 51 | Coming | Volatility, Autopsy |
@@ -601,6 +601,6 @@ Always obtain proper authorization before testing systems you do not own.
 
 <div align="center">
 
-**302 tools documented. 200,000+ lines. 10 phases complete. Updated weekly.**
+**344 tools documented. 200,000+ lines. 12 phases complete. Updated weekly.**
 
 </div>
