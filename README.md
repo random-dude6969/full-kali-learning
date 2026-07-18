@@ -48,7 +48,7 @@ Most Kali tool docs are either too shallow (a few commands) or too scattered (ra
 |-------|------|-------|-------|--------|
 | 01 | [Reconnaissance](01_reconnaissance/) | 80 | 75,606 | **Complete** |
 | 02 | [Resource Development](02_resource_development/) | 34 | 21,292 | **Complete** |
-| 03 | Initial Access | 10 | - | Developing |
+| 03 | [Initial Access](03_initial_access/) | 10 | 10,488 | **Complete** |
 | 04 | Execution | 6 | - | Developing |
 | 05 | Persistence | 7 | - | Developing |
 | 06 | Privilege Escalation | 6 | - | Developing |
@@ -70,7 +70,7 @@ Most Kali tool docs are either too shallow (a few commands) or too scattered (ra
 ```
 [x] Phase 01 - Reconnaissance (80 tools) DONE
 [x] Phase 02 - Resource Development (34 tools) DONE
-[ ] Phase 03 - Initial Access (10 tools) NEXT
+[x] Phase 03 - Initial Access (10 tools) DONE
 [ ] Phase 04 - Execution (6 tools)
 [ ] Phase 05 - Persistence (7 tools)
 [ ] Phase 06 - Privilege Escalation (6 tools)
@@ -228,7 +228,7 @@ Educational purposes only. Always get authorization before testing systems you d
 
 If this helps your learning, give it a star. It motivates more content.
 
-**Phase 01: Done** | **Phase 02: Done** | **Phase 03: In Progress**
+**Phase 01: Done** | **Phase 02: Done** | **Phase 03: Done**
 
 [Back to Top](#kali-linux-tools---the-complete-learning-repository)
 
