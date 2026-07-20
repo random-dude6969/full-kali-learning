@@ -483,6 +483,356 @@ sslsplit -l /dev/null -k ca.key -c ca.pem https 0.0.0.0 8443
 
 ---
 
+## Chapter 9: Configuration File
+
+### sslsplit.conf Format
+
+sslsplit supports configuration files to avoid long command lines:
+
+```
+# /etc/sslsplit/sslsplit.conf
+
+# SSL/TLS keys and certificates
+ca /etc/sslsplit/ca.pem
+cert /etc/sslsplit/ca.key
+
+# Logging
+l /var/log/sslsplit/connections.log
+L /var/log/sslsplit/content.log
+S /var/log/sslsplit/content/
+M /var/log/sslsplit/masterkeys.log
+
+# PCAP output
+X /var/log/sslsplit/pcap/
+
+# Security options
+O           # Deny OCSP requests
+P           # Pass-through unsplittable connections
+j /tmp/sslsplit/  # Chroot jail
+
+# Drop privileges
+u nobody
+g nogroup
+
+# Proxy specifications
+# syntax: type listen_addr listen_port [dest_addr dest_port]
+https 0.0.0.0 8443
+http 0.0.0.0 8080
+tcp 0.0.0.0 10025
+```
+
+### Using Configuration File
+
+```bash
+# Start with configuration file
+sslsplit -F /etc/sslsplit/sslsplit.conf
+
+# Override specific options
+sslsplit -F /etc/sslsplit/sslsplit.conf -D  # Add debug mode
+```
+
+### nftables Rules
+
+```bash
+#!/usr/sbin/nft -f
+# /etc/nftables.d/sslsplit.conf
+
+# Flush existing nat rules
+flush ruleset
+
+table ip sslsplit_nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+
+        # Redirect HTTP to sslsplit
+        iifname "eth0" tcp dport 80 redirect to :8080
+
+        # Redirect HTTPS to sslsplit
+        iifname "eth0" tcp dport 443 redirect to :8443
+
+        # Redirect SMTP STARTTLS
+        iifname "eth0" tcp dport 25 redirect to :8465
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+
+        # NAT for internet sharing
+        oifname "eth0" masquerade
+    }
+}
+```
+
+### IPv6 Interception
+
+```bash
+# Enable IPv6 forwarding
+sudo sysctl -w net.ipv6.conf.all.forwarding=1
+
+# Redirect IPv6 HTTPS traffic
+sudo ip6tables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 \
+  -j REDIRECT --to-ports 8443
+
+# Start sslsplit with IPv6 support
+sslsplit -k ca.key -c ca.pem \
+  https 0.0.0.0 8443 \
+  https [::] 8443 \
+  http 0.0.0.0 8080 \
+  http [::] 8080
+```
+
+### Certificate Generation Best Practices
+
+```bash
+# Generate a strong CA key and certificate
+# Use ECDSA for better performance
+openssl ecparam -genkey -name prime256v1 -out ca.key
+openssl req -new -x509 -key ca.key -out ca.pem -days 3650 \
+  -subj "/CN=sslsplit CA" \
+  -addext "basicConstraints=critical,CA:TRUE" \
+  -addext "keyUsage=critical,keyCertSign,cRLSign"
+
+# For RSA (slower but broader compatibility)
+openssl genrsa -out ca_rsa.key 4096
+openssl req -new -x509 -key ca_rsa.key -out ca_rsa.pem -days 3650 \
+  -subj "/CN=sslsplit CA RSA"
+
+# Verify the generated certificate
+openssl x509 -in ca.pem -text -noout
+```
+
+---
+
+## Chapter 10: Advanced STARTTLS Interception
+
+### SMTP STARTTLS
+
+```bash
+# Intercept SMTP with STARTTLS upgrade
+sslsplit -D -l /var/log/sslsplit/smtp.log \
+  -S /var/log/smtp_content/ \
+  -k ca.key -c ca.pem \
+  autossl 0.0.0.0 8465 192.168.1.10 25
+
+# Redirect SMTP traffic
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 25 \
+  -j REDIRECT --to-ports 8465
+```
+
+### IMAP/POP3 STARTTLS
+
+```bash
+# Intercept IMAP STARTTLS
+sslsplit -D -l /var/log/sslsplit/imap.log \
+  -S /var/log/imap_content/ \
+  -k ca.key -c ca.pem \
+  autossl 0.0.0.0 8993 192.168.1.10 143
+
+# Intercept POP3 STARTTLS
+sslsplit -D -l /var/log/sslsplit/pop3.log \
+  -S /var/log/pop3_content/ \
+  -k ca.key -c ca.pem \
+  autossl 0.0.0.0 8995 192.168.1.10 110
+
+# Redirect mail traffic
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 143 \
+  -j REDIRECT --to-ports 8993
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 110 \
+  -j REDIRECT --to-ports 8995
+```
+
+### MySQL/PostgreSQL SSL
+
+```bash
+# Intercept MySQL SSL connections
+sslsplit -D -l /var/log/sslsplit/mysql.log \
+  -k ca.key -c ca.pem \
+  ssl 0.0.0.0 3307 192.168.1.10 3306
+
+# Intercept PostgreSQL SSL
+sslsplit -D -l /var/log/sslsplit/pg.log \
+  -k ca.key -c ca.pem \
+  ssl 0.0.0.0 5433 192.168.1.10 5432
+```
+
+---
+
+## Chapter 11: Log Management and Analysis
+
+### Log Rotation
+
+```bash
+# /etc/logrotate.d/sslsplit
+/var/log/sslsplit/*.log {
+    daily
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    create 0640 nobody nogroup
+    sharedscripts
+    postrotate
+        systemctl reload sslsplit > /dev/null 2>&1 || true
+    endscript
+}
+```
+
+### Content Log Analysis
+
+```bash
+# Search for credentials in content logs
+grep -rl "password\|passwd\|Authorization\|Bearer" /var/log/sslsplit/content/
+
+# Extract HTTP POST data
+find /var/log/sslsplit/content/ -type f -exec grep -l "POST" {} \; | \
+  xargs grep -A5 "POST"
+
+# Count connections per IP
+cat /var/log/sslsplit/connections.log | awk '{print $1}' | sort | uniq -c | sort -rn
+
+# Find largest sessions
+ls -lhS /var/log/sslsplit/content/ | head -20
+```
+
+### PCAP Analysis
+
+```bash
+# Open PCAP output in Wireshark
+wireshark /var/log/sslsplit/pcap/
+
+# Analyze with tshark
+tshark -r /var/log/sslsplit/pcap/session.pcap -Y "http" -T fields \
+  -e http.host -e http.request.uri -e http.request.method
+
+# Extract files from PCAP
+tshark -r session.pcap --export-objects "http,/tmp/extracted_files/"
+```
+
+### Master Key Logging for Wireshark
+
+```bash
+# Start sslsplit with master key logging
+sslsplit -M /var/log/sslsplit/masterkeys.log \
+  -k ca.key -c ca.pem \
+  https 0.0.0.0 8443
+
+# In Wireshark, load the master keys:
+# Edit → Preferences → Protocols → TLS
+# (Pre)-Master-Secret log filename: /var/log/sslsplit/masterkeys.log
+```
+
+---
+
+## Chapter 12: Enterprise Deployment
+
+### High-Throughput Tuning
+
+```bash
+# Increase file descriptor limits
+ulimit -n 65536
+echo "sslsplit soft nofile 65536" >> /etc/security/limits.conf
+echo "sslsplit hard nofile 65536" >> /etc/security/limits.conf
+
+# Use multiple instances for load distribution
+# Instance 1: HTTP
+sslsplit -D -k ca.key -c ca.pem http 0.0.0.0 8080 &
+# Instance 2: HTTPS
+sslsplit -D -k ca.key -c ca.pem https 0.0.0.0 8443 &
+
+# Optimize kernel network buffers
+sudo sysctl -w net.core.rmem_max=16777216
+sudo sysctl -w net.core.wmem_max=16777216
+sudo sysctl -w net.ipv4.tcp_rmem="4096 87380 16777216"
+```
+
+### Systemd Service File
+
+```ini
+# /etc/systemd/system/sslsplit.service
+[Unit]
+Description=SSLsplit Transparent SSL/TLS Interception
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/sslsplit -F /etc/sslsplit/sslsplit.conf
+Restart=always
+RestartSec=5
+User=nobody
+Group=nogroup
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# Enable and start
+sudo systemctl daemon-reload
+sudo systemctl enable sslsplit
+sudo systemctl start sslsplit
+sudo systemctl status sslsplit
+```
+
+### Network Tap Hardware
+
+For passive interception on production networks:
+
+```
+Recommended hardware taps:
+- Network TAP: Garland Technology GTPtap series
+- Fiber tap: Keysight/IXIA network brokers
+- Copper tap: Dualcomm ETAP series
+
+Deployment considerations:
+- Passive taps are undetectable (no electrical signature)
+- Support full-duplex traffic at line rate
+- No latency addition
+- SPAN/mirror port alternative (may drop packets under load)
+```
+
+---
+
+## Chapter 13: Comparison with Other Tools
+
+### sslsplit vs mitmproxy
+
+| Feature | sslsplit | mitmproxy |
+|---------|----------|-----------|
+| Operation Mode | Transparent (NAT) | Explicit proxy |
+| Protocol Support | Any TCP/SSL | HTTP/HTTPS focused |
+| Configuration | CLI / config file | CLI / scripts |
+| Scripting | None | Python addons |
+| Performance | High (C) | Moderate (Python) |
+| Deployment | Network-level | Application-level |
+| Stealth | Very high | Moderate |
+
+### sslsplit vs sslsniff
+
+| Feature | sslsplit | sslsniff |
+|---------|----------|----------|
+| Architecture | Transparent proxy | Inline proxy |
+| Certificate Handling | Dynamic on-the-fly | Dynamic + targeted |
+| OCSP Handling | Denial (-O flag) | Denial (-d flag) |
+| HPKP Bypass | Automatic | Manual |
+| STARTTLS | Yes (autossl) | Limited |
+| PCAP Output | Yes | No |
+| Master Key Logging | Yes | No |
+
+### sslsplit vs Squid + SSL bump
+
+| Feature | sslsplit | Squid + SSL bump |
+|---------|----------|-----------------|
+| Complexity | Simple | Complex |
+| Filtering | Minimal | Full URL filtering |
+| Authentication | None | Built-in |
+| Caching | No | Yes |
+| Logging | Basic | Full access.log |
+| Resource Usage | Low | High |
+
+---
+
 ## Resources
 
 - **GitHub:** https://github.com/droe/sslsplit
@@ -491,3 +841,7 @@ sslsplit -l /dev/null -k ca.key -c ca.pem https 0.0.0.0 8443
 - **Manual Pages:** `man sslsplit` and `man sslsplit.conf`
 - **OpenSSL Documentation:** https://www.openssl.org/docs/
 - **Wireshark TLS:** https://www.wireshark.org/docs/
+- **RFC 5246 (TLS 1.2):** https://tools.ietf.org/html/rfc5246
+- **RFC 8446 (TLS 1.3):** https://tools.ietf.org/html/rfc8446
+- **nftables Wiki:** https://wiki.nftables.org/
+- **Network TAP Guide:** https://www.garlandtechnology.com/resources/blog/what-is-a-network-tap

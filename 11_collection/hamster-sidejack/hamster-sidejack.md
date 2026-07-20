@@ -529,6 +529,224 @@ rm -f /tmp/ferret*.log
 
 ---
 
+## Chapter 9: HTTP Cookie Security Analysis
+
+### Cookie Flags and Sidejacking
+
+```bash
+# Analyze captured cookies for security weaknesses
+# Hamster targets cookies WITHOUT security flags
+
+# Secure flag - prevents cookie sent over HTTP
+# HttpOnly flag - prevents JavaScript access
+# SameSite flag - prevents cross-site sending
+
+# Ferret captures HTTP cookies (no Secure flag)
+# If a cookie is sent over HTTP, it's vulnerable to sidejacking
+
+# Check for vulnerable cookies
+grep -i "set-cookie" captured_traffic.txt | grep -v -i "secure\|httponly\|samesite"
+```
+
+### Session Token Analysis
+
+```bash
+# Analyze captured session tokens for entropy
+# Weak tokens are vulnerable to brute-force
+
+# Check token length
+cat ~/hamster/cookies.txt | awk '{print length($0)}' | sort -n | head -5
+
+# Check for predictable patterns
+grep -oP 'session_id=\K[^;]+' ~/hamster/cookies.txt | head -10
+
+# Entropy analysis
+python3 -c "
+import math
+from collections import Counter
+
+tokens = open('/tmp/tokens.txt').read().splitlines()
+for token in tokens[:5]:
+    freq = Counter(token)
+    entropy = -sum((c/len(token)) * math.log2(c/len(token)) for c in freq.values())
+    print(f'Token: {token[:20]}... Length: {len(token)} Entropy: {entropy:.2f} bits/char')
+"
+```
+
+---
+
+## Chapter 10: Modern Context and Limitations
+
+### Why HTTPS Limits Hamster
+
+```
+Modern web security has largely eliminated HTTP-only session cookies:
+
+1. HSTS (HTTP Strict Transport Security)
+   - Forces HTTPS for all connections
+   - Preloaded in major browsers
+   - Prevents HTTP downgrade attacks
+
+2. Secure Flag on Cookies
+   - Cookies only sent over HTTPS
+   - Cannot be captured by network sniffing
+
+3. SameSite Cookie Attribute
+   - LAX: Sent only in top-level navigation
+   - STRICT: Never sent cross-site
+   - Prevents CSRF and some session theft
+
+4. Browser HTTPS-Only Mode
+   - Firefox: HTTPS-Only Mode
+   - Chrome: HTTPS-First Mode
+   - Warns before loading HTTP pages
+```
+
+### Remaining Attack Surface
+
+```bash
+# HTTP traffic that still exists:
+# - Legacy internal applications
+# - IoT devices (cameras, printers, smart TVs)
+# - Development/staging environments
+# - Internal admin panels
+# - Some API endpoints
+# - DNS-over-HTTP (DoH) connections
+# - CDN edge connections
+
+# Scan for HTTP traffic on network
+sudo tcpdump -i eth0 port 80 -nn -c 100 | awk '{print $3}' | cut -d. -f1-4 | sort | uniq -c | sort -rn
+```
+
+### Alternative: HTTPS Session Hijacking
+
+```bash
+# For HTTPS session hijacking, different tools are needed:
+# - bettercap (with TLS proxy)
+# - mitmproxy (certificate interception)
+# - sslstrip + sslsniff (HTTP downgrade + MITM)
+# - Responder + NTLM relay (for Windows)
+
+# Example with bettercap
+sudo bettercap -iface eth0
+# set arp.spoof.targets 192.168.1.0/24
+# set net.sniff.ssl true
+# arp.spoof on
+# net.sniff on
+```
+
+---
+
+## Chapter 11: Network Forensics with Hamster
+
+### Evidence Collection
+
+```bash
+# Document the attack for penetration testing reports
+
+# Step 1: Capture network traffic
+sudo tcpdump -i eth0 -w evidence_capture.pcap port 80 &
+
+# Step 2: Run Ferret to capture cookies
+sudo ferret-sidejack -i eth0 2>&1 | tee ferret_evidence.log &
+
+# Step 3: Start Hamster and document actions
+hamster-sidejack 2>&1 | tee hamster_evidence.log &
+
+# Step 4: Screenshot browser showing hijacked sessions
+# Use scrot or similar tool
+
+# Step 5: Clean up
+pkill ferret-sidejack
+pkill hamster-sidejack
+rm -f ~/hamster/cookies.txt
+```
+
+### PCAP Analysis for HTTP Cookies
+
+```bash
+# Extract cookies from PCAP with tshark
+tshark -r capture.pcap -Y "http.cookie" -T fields \
+  -e http.cookie -e http.host -e http.request.uri | head -20
+
+# Extract full HTTP streams
+tshark -r capture.pcap -q -z conv,http
+
+# Follow TCP stream containing cookies
+tshark -r capture.pcap -q -z follow,tcp,ascii,0
+```
+
+---
+
+## Chapter 12: Defense and Mitigation
+
+### Server-Side Defenses
+
+```
+1. Set Secure flag on all cookies:
+   Set-Cookie: session=abc123; Secure; HttpOnly; SameSite=Strict
+
+2. Implement HSTS:
+   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+3. Use short session timeouts:
+   Session expires after 15-30 minutes of inactivity
+
+4. Bind sessions to client attributes:
+   - IP address (may break mobile users)
+   - User-Agent string
+   - TLS session ticket
+
+5. Implement session rotation:
+   - Regenerate session ID after login
+   - Regenerate periodically
+
+6. Use anti-CSRF tokens:
+   - Prevents cross-site request forgery
+   - Additional layer beyond SameSite
+```
+
+### Network-Side Defenses
+
+```bash
+# 1. Enforce 802.1X for network access
+# Requires authentication before getting network access
+
+# 2. Deploy NAC (Network Access Control)
+# Checks device compliance before allowing access
+
+# 3. Segment sensitive traffic
+# VLANs for different trust levels
+# Firewall rules between segments
+
+# 4. Monitor for ARP anomalies
+# arpwatch detects ARP table changes
+sudo apt install arpwatch
+sudo systemctl enable arpwatch
+
+# 5. Deploy Network IDS
+# Snort/Suricata rules for sidejacking detection
+```
+
+### Client-Side Defenses
+
+```
+1. Browser Extensions:
+   - HTTPS Everywhere (force HTTPS)
+   - NoScript (block JavaScript)
+
+2. VPN Usage:
+   - Encrypts all traffic
+   - Prevents WiFi sniffing
+
+3. Browser Settings:
+   - Enable HTTPS-Only Mode
+   - Disable proxy auto-configuration
+   - Clear cookies on browser close
+```
+
+---
+
 ## Resources
 
 - **Errata Security:** http://www.erratasec.com/research.html
@@ -538,3 +756,6 @@ rm -f /tmp/ferret*.log
 - **Wireshark:** https://www.wireshark.org
 - **OWASP Session Management:** https://owasp.org/www-community/attacks/Session_hijacking
 - **RFC 6265 (HTTP Cookies):** https://tools.ietf.org/html/rfc6265
+- **RFC 6797 (HSTS):** https://tools.ietf.org/html/rfc6797
+- **RFC 6265bis:** https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis
+- **NIST SP 800-123:** https://csrc.nist.gov/publications/detail/sp/800-123/final

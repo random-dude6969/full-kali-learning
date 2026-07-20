@@ -407,6 +407,219 @@ ssldump -i eth0 -f "host target.local and port 443"
 
 ---
 
+## Chapter 9: Configuration and Environment
+
+### Environment Variables
+
+ssldump respects several environment variables that control its behavior:
+
+```bash
+# SSLKEYLOGFILE - Used by browsers to export session keys
+export SSLKEYLOGFILE=/tmp/sslkeylog.txt
+
+# Configure Firefox to log keys
+# In about:config, set:
+#   security.ssl.keylog.file = /tmp/sslkeylog.txt
+
+# Configure Chrome to log keys
+google-chrome --ssl-key-log-file=/tmp/sslkeylog.txt
+
+# Configure curl to log keys
+curl --ssl-keylog-file /tmp/sslkeylog.txt https://example.com
+```
+
+### BPF Filter Syntax
+
+ssldump accepts Berkeley Packet Filter expressions for fine-grained capture control:
+
+```bash
+# Filter by host
+ssldump -i eth0 -f "host 192.168.1.100"
+
+# Filter by subnet
+ssldump -i eth0 -f "net 192.168.1.0/24"
+
+# Filter by port
+ssldump -i eth0 -f "port 443"
+
+# Filter by host and port
+ssldump -i eth0 -f "host 192.168.1.100 and port 443"
+
+# Exclude traffic
+ssldump -i eth0 -f "not port 22"
+
+# Complex filters
+ssldump -i eth0 -f "tcp port 443 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)"
+
+# Capture only SYN packets (new connections)
+ssldump -i eth0 -f "tcp[tcpflags] & (tcp-syn) != 0 and port 443"
+```
+
+### Output Format
+
+ssldump output follows a structured format:
+
+```
+New TCP connection #1: 192.168.1.100(49832) <-> 192.168.1.1(443)
+1 1  0.0021 (0.0021)  C>S  ClientHello
+1 2  0.0045 (0.0024)  S>C  ServerHello
+1 3  0.0048 (0.0003)  S>C  Certificate
+1 4  0.0051 (0.0003)  S>C  ServerKeyExchange
+1 5  0.0053 (0.0002)  S>C  ServerHelloDone
+1 6  0.0089 (0.0036)  C>S  ClientKeyExchange
+1 7  0.0091 (0.0002)  C>S  ChangeCipherSpec
+1 8  0.0092 (0.0001)  C>S  Finished
+1 9  0.0123 (0.0031)  S>C  ChangeCipherSpec
+1 10 0.0125 (0.0002)  S>C  Finished
+1 11 0.0134 (0.0009)  C>S  applicationData
+1 12 0.0145 (0.0011)  S>C  applicationData
+```
+
+**Format breakdown:**
+- Column 1: Connection number
+- Column 2: Packet number within connection
+- Column 3: Time offset from connection start
+- Column 4: Delta time from previous packet
+- Column 5: Direction (C>S = client to server, S>C = server to client)
+- Column 6: Record type
+
+### Protocol Version Analysis
+
+```bash
+# Detect SSL version used
+ssldump -i eth0 -v 2>&1 | grep -E "ClientHello|ServerHello" | head -20
+
+# Count connections by protocol version
+ssldump -i eth0 -v 2>&1 | grep "ServerHello" | awk '{print $NF}' | sort | uniq -c
+
+# Look for deprecated protocols
+ssldump -i eth0 -v 2>&1 | grep -i "ssl 3\|tls 1\.0\|tls 1\.1"
+```
+
+### Cipher Suite Analysis
+
+```bash
+# Extract cipher suites from ClientHello
+ssldump -i eth0 -v 2>&1 | grep -A5 "ClientHello"
+
+# Look for weak cipher suites
+ssldump -i eth0 -v 2>&1 | grep -i "RC4\|DES\|NULL\|EXPORT\|anon"
+
+# Identify forward secrecy usage
+ssldump -i eth0 -v 2>&1 | grep -i "DHE\|ECDHE"
+```
+
+### Certificate Inspection
+
+```bash
+# View certificates from captured traffic
+ssldump -i eth0 -v 2>&1 | grep -A20 "Certificate"
+
+# Extract certificate details
+ssldump -r capture.pcap -v 2>&1 | awk '/Certificate/,/^$/'
+
+# Check for self-signed certificates
+ssldump -i eth0 -v 2>&1 | grep -B5 -A15 "Certificate" | grep -i "self-signed\|issuer\|subject"
+```
+
+---
+
+## Chapter 10: Network Forensics Workflow
+
+### Full Forensics Pipeline
+
+```bash
+# Step 1: Capture encrypted traffic
+tcpdump -i eth0 -w encrypted_traffic.pcap port 443
+
+# Step 2: Obtain the server's private key
+# (from server configuration, memory dump, or key extraction)
+cp /etc/ssl/private/server.key ./forensics_key.key
+
+# Step 3: Analyze with ssldump
+ssldump -r encrypted_traffic.pcap -k forensics_key.key -A > decrypted_http.txt
+
+# Step 4: Extract credentials
+grep -i "authorization\|password\|token\|cookie\|api.key" decrypted_http.txt
+
+# Step 5: Export to PCAP for Wireshark
+ssldump -r encrypted_traffic.pcap -k forensics_key.key -w decrypted_traffic.pcap
+```
+
+### PCAP Analysis with SSLKEYLOGFILE
+
+When the private key is unavailable (forward secrecy), use session key logging:
+
+```bash
+# Step 1: Configure target application to log session keys
+# Firefox: about:config → security.ssl.keylog.file → /tmp/keys.log
+# Chrome: --ssl-key-log-file=/tmp/keys.log
+
+# Step 2: Capture traffic simultaneously
+tcpdump -i eth0 -w session_capture.pcap port 443
+
+# Step 3: Analyze with session keys
+ssldump -r session_capture.pcap -l /tmp/keys.log -A
+
+# Step 4: Alternative - use in Wireshark
+# Edit → Preferences → Protocols → TLS → (Pre)-Master-Secret log filename
+# Point to /tmp/keys.log
+```
+
+### Correlating with Network Logs
+
+```bash
+# Combine ssldump output with firewall logs
+paste <(ssldump -i eth0 -t -p 443 2>/dev/null) <(tail -f /var/log/nginx/access.log) | head -50
+
+# Cross-reference with DNS logs
+ssldump -i eth0 -h target.local -p 443 -t 2>&1 | while read line; do
+    timestamp=$(echo "$line" | awk '{print $1}')
+    echo "[$timestamp] SSL connection to target.local"
+    grep "$timestamp" /var/log/dnsmasq.log 2>/dev/null
+done
+```
+
+---
+
+## Chapter 11: Comparison with Other Tools
+
+### ssldump vs Wireshark
+
+| Feature | ssldump | Wireshark |
+|---------|---------|-----------|
+| Interface | Command-line | GUI |
+| Decryption | RSA key, SSLKEYLOGFILE | RSA key, SSLKEYLOGFILE, NSS |
+| Scripting | Yes (output parsing) | Yes (Lua scripting) |
+| PCAP Analysis | Yes | Yes |
+| Real-time Capture | Yes | Yes |
+| Protocol Decode | SSL/TLS focused | All protocols |
+| Performance | Lightweight | Heavy resource usage |
+| Automation | Excellent (CLI) | Limited |
+
+### ssldump vs tcpdump
+
+| Feature | ssldump | tcpdump |
+|---------|---------|---------|
+| SSL/TLS Decryption | Yes | No (shows encrypted data) |
+| Application Data | Decoded when decrypted | Raw bytes |
+| BPF Filters | Yes | Yes |
+| PCAP Write | Yes | Yes |
+| Protocol Awareness | SSL/TLS + HTTP | All (via decode) |
+
+### ssldump vs mitmproxy
+
+| Feature | ssldump | mitmproxy |
+|---------|---------|-----------|
+| Operation | Passive capture | Active proxy |
+| Traffic Modification | No | Yes |
+| Scripting | Output parsing | Python addons |
+| Encryption | Decrypts with key | Forges certificates |
+| Network Position | Any (passive) | In-path (active) |
+| Stealth | Very stealthy | Detectable |
+
+---
+
 ## Resources
 
 - **GitHub:** https://github.com/adulau/ssldump
@@ -414,3 +627,7 @@ ssldump -i eth0 -f "host target.local and port 443"
 - **SSL/TLS Protocol:** https://tools.ietf.org/html/rfc8446
 - **Wireshark:** https://www.wireshark.org/
 - **tcpdump:** https://www.tcpdump.org/
+- **RFC 5246 (TLS 1.2):** https://tools.ietf.org/html/rfc5246
+- **RFC 6101 (SSL 3.0):** https://tools.ietf.org/html/rfc6101
+- **OWASP Testing Guide:** https://owasp.org/www-project-web-security-testing-guide/
+- **NIST SP 800-52 Rev 2:** https://csrc.nist.gov/publications/detail/sp/800-52/rev-2/final

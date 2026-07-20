@@ -22,17 +22,39 @@
 
 ---
 
-**The most comprehensive Kali Linux tool documentation on GitHub.**
+# Kali Linux Tools — 344 Penetration Testing Tools with Tutorials
 
-344 penetration testing tools documented with step-by-step tutorials, command references, and real-world scenarios.
-
-From network scanning to exploitation to post-exploitation — complete guides for ethical hacking, CTF competitions, bug bounty, and security certifications.
+**Complete ethical hacking reference**: every major Kali Linux tool documented with installation guides, command references, advanced techniques, and real-world scenarios. Organized by the MITRE ATT&CK framework across 12 attack phases. Covers reconnaissance, exploitation, privilege escalation, credential access, lateral movement, and post-exploitation. Built for penetration testers, bug bounty hunters, CTF competitors, and OSCP/CEH/GPEN candidates.
 
 <br>
 
 <img src="star.png" width="500" alt="Star this Kali Linux tools repository">
 
 </div>
+
+---
+
+## Quick Navigation
+
+[Nmap](01_reconnaissance/03_network_information/nmap/nmap.md) · 
+[Metasploit](03_initial_access/metasploit-framework/metasploit-framework.md) · 
+[SQLMap](03_initial_access/sqlmap/sqlmap.md) · 
+[Burp Suite](01_reconnaissance/07_web_vulnerability_scanning/burpsuite/burpsuite.md) · 
+[Hashcat](08_credential_access/password_cracking/hashcat/hashcat.md) · 
+[Ghidra](02_resource_development/disassemblers_debuggers/ghidra/ghidra.md) · 
+[Mimikatz](07_defense_evasion/pass_the_hash/mimikatz/mimikatz.md) · 
+[BloodHound](09_discovery/active_directory/bloodhound/bloodhound.md)
+
+---
+
+## Use Cases
+
+- **OSCP Preparation** — Complete tool coverage for the Offensive Security certification exam
+- **CTF Competitions** — Quick reference for web, crypto, forensics, reverse engineering, and pwn challenges
+- **Bug Bounty** — Recon, scanning, and exploitation toolchain for HackerOne, Bugcrowd, and Intigriti
+- **Penetration Testing** — Full methodology from reconnaissance to reporting
+- **Security Research** — Tool comparisons, advanced techniques, and detection methods
+- **Blue Team Training** — Understand attacker tools to build better defenses
 
 ---
 
@@ -596,6 +618,16 @@ Want to add documentation for a tool? See [CONTRIBUTING.md](CONTRIBUTING.md).
 MIT License. Educational purposes only.
 
 Always obtain proper authorization before testing systems you do not own.
+
+---
+
+## Related Resources
+
+- [MITRE ATT&CK Framework](https://attack.mitre.org/)
+- [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
+- [HackTricks](https://book.hacktricks.xyz/)
+- [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
+- [The Hacker Recipes](https://www.thehacker.recipes/)
 
 ---
 

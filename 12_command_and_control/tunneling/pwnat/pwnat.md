@@ -207,8 +207,296 @@ pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r HOST_A:22
 
 **Explanation**: Both hosts connect to the airlock and establish direct communication. This enables peer-to-peer connections without port forwarding.
 
+## Chapter 9: Command Reference
+
+### Server Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-s` | Server mode | client mode |
+| `-p, --port` | Listen port | 35000 |
+| `-i, --interface` | Network interface | all |
+| `-v` | Verbose output | quiet |
+
+### Client Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-c, --connect` | Airlock server address | none (required) |
+| `-l, --local` | Local listen address | 127.0.0.1:8080 |
+| `-r, --remote` | Remote target address | none (required) |
+| `-p, --port` | Airlock port | 35000 |
+| `-d` | Daemon mode | foreground |
+| `-v` | Verbose output | quiet |
+
+### NAT Types
+
+| Type | Description | pwnat Support |
+|------|-------------|---------------|
+| Full Cone | Any external host can send | Yes |
+| Restricted Cone | Only hosts seen by internal | Yes |
+| Port-Restricted Cone | Like restricted + port | Yes |
+| Symmetric | Different mapping per dest | No |
+
+### UDP Hole Punching Process
+
+```
+1. Client A connects to airlock (creates NAT mapping)
+2. Client B connects to airlock (creates NAT mapping)
+3. Airlock shares NAT mapping info between clients
+4. Clients send packets to each other's public endpoints
+5. NAT devices accept packets (hole punched)
+6. Direct communication established
+```
+
+## Chapter 10: Real-World Scenarios
+
+### Scenario 1: Remote Access Without Port Forwarding
+
+```bash
+# Airlock server on VPS
+pwnat -s -p 35000
+
+# Home computer (behind NAT)
+pwnat -c VPS_IP:35000 -l 127.0.0.1:8000 -r home-server:22
+
+# Connect via tunnel
+ssh -p 8000 user@127.0.0.1
+```
+
+**Explanation**: pwnat provides SSH access to a home server without port forwarding on the router. The airlock coordinates the connection.
+
+### Scenario 2: Peer-to-Peer File Sharing
+
+```bash
+# Host A
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r host-a:22
+
+# Host B
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r host-b:22
+
+# Host A connects to Host B
+scp -P 8000 file.txt user@127.0.0.1
+```
+
+**Explanation**: Two hosts behind NAT can establish direct connections through the airlock for file sharing.
+
+### Scenario 3: Multi-Service Access
+
+```bash
+# Terminal 1: SSH
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r TARGET:22
+
+# Terminal 2: HTTP
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8080 -r TARGET:80
+
+# Terminal 3: RDP
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:3389 -r TARGET:3389
+
+# Terminal 4: MySQL
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:3306 -r TARGET:3306
+```
+
+**Explanation**: Multiple services can be accessed through separate pwnat tunnels.
+
+### Scenario 4: Gaming Through NAT
+
+```bash
+# Game server behind NAT
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:27015 -r game-server:27015
+
+# Game client connects to local port
+# Game settings: server 127.0.0.1:27015
+```
+
+**Explanation**: pwnat enables gaming connections between NAT'd hosts without port forwarding.
+
+### Scenario 5: VoIP Through Strict NAT
+
+```bash
+# SIP server behind NAT
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:5060 -r sip-server:5060
+
+# RTP port range
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:10000 -r sip-server:10000
+
+# Configure SIP client
+# SIP Proxy: 127.0.0.1:5060
+# RTP Port: 10000
+```
+
+**Explanation**: VoIP traffic can be tunneled through NAT for communication in restrictive environments.
+
+## Chapter 11: Detection and Defense
+
+### Network Detection
+
+```bash
+# Monitor for UDP traffic to airlock ports
+tcpdump -i eth0 udp port 35000
+
+# Check for pwnat signatures
+# - UDP packets with specific header format
+# - Traffic to known airlock IPs
+# - Unusual UDP patterns
+```
+
+### Host-Based Detection
+
+```bash
+# Check for pwnat processes
+ps aux | grep pwnat
+
+# Monitor network connections
+ss -ulnp | grep pwnat
+netstat -ulnp | grep pwnat
+
+# Check for airlock server
+ps aux | grep "pwnat -s"
+```
+
+### IDS/IPS Signatures
+
+```bash
+# Snort rule for pwnat
+alert udp any any -> any 35000 (
+    msg:"pwnat Airlock Connection";
+    content:"|00|";
+    depth:1;
+    sid:2024001; rev:1;
+)
+```
+
+### Defense Recommendations
+
+1. Monitor for unusual UDP traffic patterns
+2. Block outbound UDP to non-standard ports
+3. Implement egress filtering
+4. Monitor for airlock servers
+5. Use network segmentation
+
+### Traffic Analysis
+
+```bash
+# Capture UDP traffic
+tcpdump -i eth0 udp -w pwnat.pcap
+
+# Analyze packet sizes
+tshark -r pwnat.pcap -T fields -e udp.length | sort | uniq -c
+
+# Check for tunnel signatures
+tshark -r pwnat.pcap -Y "udp.port == 35000" -T fields -e data | head -5
+```
+
+## Chapter 12: Troubleshooting
+
+### Connection Issues
+
+```bash
+# Test airlock connectivity
+nc -uzv AIRLOCK_IP 35000
+
+# Check firewall rules
+iptables -L -n | grep 35000
+ufw status | grep 35000
+
+# Verify airlock is running
+ps aux | grep "pwnat -s"
+
+# Test UDP connectivity
+echo "test" | nc -u AIRLOCK_IP 35000
+```
+
+### NAT Type Issues
+
+```bash
+# Check NAT type
+# Use online NAT type checker or
+
+# Test with pwnat verbose mode
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r TARGET:22 -v
+
+# If symmetric NAT, pwnat won't work
+# Consider alternative: SSH tunnel, VPN, etc.
+```
+
+### Performance Issues
+
+```bash
+# Check latency
+ping -c 10 AIRLOCK_IP
+
+# Monitor UDP packet loss
+mtr AIRLOCK_IP
+
+# Use verbose mode for diagnostics
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r TARGET:22 -vvv
+```
+
+### Daemon Mode
+
+```bash
+# Start in background
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r TARGET:22 -d
+
+# Check if running
+ps aux | grep pwnat
+
+# Stop daemon
+killall pwnat
+```
+
+### Multiple Connections
+
+```bash
+# Each tunnel needs separate instance
+# Terminal 1
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8000 -r TARGET:22
+
+# Terminal 2
+pwnat -c AIRLOCK:35000 -l 127.0.0.1:8080 -r TARGET:80
+
+# Verify both running
+ps aux | grep pwnat
+```
+
+## Chapter 13: Comparison with Alternatives
+
+### pwnat vs ngrok
+
+| Feature | pwnat | ngrok |
+|---------|-------|-------|
+| Protocol | UDP hole punching | TCP tunnel |
+| Server required | Airlock | ngrok cloud |
+| Encryption | No | Yes (HTTPS) |
+| Cost | Free | Free/Paid |
+| Setup | Simple | Simple |
+| Reliability | NAT dependent | More reliable |
+
+### pwnat vs frp
+
+| Feature | pwnat | frp |
+|---------|-------|-----|
+| Architecture | P2P via airlock | Client-server |
+| Encryption | No | Yes (TLS) |
+| Features | Basic tunneling | Full proxy |
+| Performance | Good | Better |
+| Configuration | Minimal | Extensive |
+
+### pwnat vs SSH Tunnel
+
+| Feature | pwnat | SSH Tunnel |
+|---------|-------|------------|
+| NAT traversal | Built-in | Requires port forwarding |
+| Encryption | No | Yes |
+| Setup | Simple | Simple |
+| Reliability | NAT dependent | More reliable |
+| Performance | Good | Better |
+
 ## Resources
 
 - [pwnat GitHub Repository](https://github.com/schmittjoseph/pwnat)
 - [UDP Hole Punching](https://en.wikipedia.org/wiki/UDP_hole_punching)
 - [NAT Traversal Techniques](https://en.wikipedia.org/wiki/NAT_traversal)
+- [MITRE ATT&CK Command and Control](https://attack.mitre.org/tactics/TA0011/)
+- [NAT Types RFC 3489](https://tools.ietf.org/html/rfc3489)

